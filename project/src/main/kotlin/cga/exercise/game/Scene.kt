@@ -41,7 +41,7 @@ class Scene(private val window: GameWindow) {
 
 
     // anstatt dem "flachen" Ground gewölbtes Ground Object verwednen?
-    private val resGround : OBJLoader.OBJResult = OBJLoader.loadOBJ("project/assets/models/ground.obj")
+    private val resGround : OBJLoader.OBJResult = OBJLoader.loadOBJ("project/assets/models/planet.obj")
     private val objMeshGround : OBJLoader.OBJMesh = resGround.objects[0].meshes[0]
 
     private var groundMesh : Mesh
@@ -158,7 +158,10 @@ class Scene(private val window: GameWindow) {
         groundMesh = Mesh(objMeshGround.vertexData, objMeshGround.indexData, objVertexAttributes, groundMaterial)
 
         groundRend.meshList.add(groundMesh)
+        groundRend.scaleLocal(Vector3f(2.0f))
         cycleRend.scaleLocal(Vector3f(0.8f))
+
+        cycleRend.parent = groundRend
 
 
 
