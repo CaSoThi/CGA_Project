@@ -7,6 +7,7 @@ import cga.exercise.components.geometry.*
 import cga.exercise.components.light.PointLight
 import cga.exercise.components.light.Spotlight
 import cga.exercise.components.shader.ShaderProgram
+import cga.exercise.components.texture.CubemapTexture
 import cga.exercise.components.texture.Texture2D
 import cga.framework.GLError
 import cga.framework.GameWindow
@@ -19,9 +20,15 @@ import org.lwjgl.opengl.GL15.*
 import kotlin.math.abs
 import org.joml.Math
 import org.joml.Vector2f
+import org.lwjgl.BufferUtils
 import org.lwjgl.glfw.GLFW.*
+import org.lwjgl.opengl.AMDSeamlessCubemapPerTexture.GL_TEXTURE_CUBE_MAP_SEAMLESS
+import org.lwjgl.opengl.ARBTextureStorage.glTexStorage2D
 import org.lwjgl.opengl.GL20
 import org.lwjgl.opengl.GL30.*
+import org.lwjgl.stb.STBImage
+import java.nio.IntBuffer
+import java.util.*
 import kotlin.math.sin
 
 
@@ -31,6 +38,7 @@ import kotlin.math.sin
 class Scene(private val window: GameWindow) {
     private val staticShader: ShaderProgram
     private val skyboxShader : ShaderProgram
+
 
     // anstatt dem "flachen" Ground gewölbtes Ground Object verwednen?
     private val resGround : OBJLoader.OBJResult = OBJLoader.loadOBJ("assets/models/ground.obj")
@@ -57,17 +65,20 @@ class Scene(private val window: GameWindow) {
     private var oldMousePosY : Double = -1.0
     private var einbool : Boolean = false
 
-    // Cubemap Vertices und Indices erzeugen
-    var skyboxVertices : FloatArray  = floatArrayOf(-1.0f, -1.0f, 1.0f,
-                                        1.0f, -1.0f, 1.0f,
-                                        1.0f, -1.0f, -1.0f,
-                                        -1.0f, -1.0f, -1.0f,
-                                        -1.0f, 1.0f, 1.0f,
-                                        1.0f, 1.0f, 1.0f,
-                                        1.0f, 1.0f, -1.0f,
-                                        -1.0f, 1.0f, -1.0f)
 
-    var skyboxIndices : IntArray = intArrayOf(
+    // Vertices und Indices der CubeMap festlegen
+    var size : Float = 500.0f
+    private var skyboxVertices : FloatArray  = floatArrayOf(
+            -size, -size, size,
+            size, -size, size,
+            size, -size, -size,
+            -size, -size, -size,
+            -size, size, size,
+            size, size, size,
+            size, size, -size,
+            -size, size, -size)
+
+    private var skyboxIndices : IntArray = intArrayOf(
             //right
             1, 2, 6,
             6, 5, 1,
@@ -88,7 +99,9 @@ class Scene(private val window: GameWindow) {
             6, 2, 3
     )
 
-    private var skyBoxMesh : Mesh
+    private var cubeMap = CubemapTexture(skyboxVertices, skyboxIndices)
+
+    var cubeMapTexture = glGenTextures()
 
     //scene setup
     init {
@@ -98,31 +111,26 @@ class Scene(private val window: GameWindow) {
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
         glDisable(GL_CULL_FACE); GLError.checkThrow()
-        glEnable(GL_CULL_FACE)
+        //glEnable(GL_CULL_FACE)
         glFrontFace(GL_CCW)
         glCullFace(GL_BACK)
         glEnable(GL_DEPTH_TEST); GLError.checkThrow()
         glDepthFunc(GL_LESS); GLError.checkThrow()
 
-       // CubeMap Textur erzeugen
-        var cubeMapTexture : Int
-        cubeMapTexture = glGenTextures()
-        glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexture)
-        GL11.glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-        GL11.glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-        GL11.glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
-        GL11.glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
-        GL11.glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE)
+        //-------------------------------------CubeMap--------------------------------------------
 
-        //Texturen für einzelne Seiten in String Array speichern
-        var facesCubeMap : Array<Texture2D> = arrayOf(Texture2D("assets/textures/-Z.png", true),
-                                                    Texture2D("assets/textures/+Z.png", true),
-                                                    Texture2D("assets/textures/+Y.png", true),
-                                                    Texture2D("assets/textures/-Y.png", true),
-                                                    Texture2D("assets/textures/+X.png", true),
-                                                    Texture2D("assets/textures/-X.png", true))
+        // Einzelne Faces der CubeMap laden
+        val facesCubeMap : Vector<String> = Vector()
+        facesCubeMap.addAll(listOf("assets/textures/nz.png",
+                                    "assets/textures/pz.png",
+                                    "assets/textures/py.png",
+                                    "assets/textures/ny.png",
+                                    "assets/textures/px.png",
+                                    "assets/textures/nx.png"))
 
+        cubeMapTexture = cubeMap.loadCubeMap(facesCubeMap)
 
+        // ---------------------------------------------------------------------------------------
 
 
         //Erzeugen der Sphere Attribute
@@ -132,6 +140,7 @@ class Scene(private val window: GameWindow) {
         val attrNorm = VertexAttribute(3, GL_FLOAT, stride, 5*4)
 
         val objVertexAttributes = arrayOf(attrPos, attrTC, attrNorm)
+
 
         //-------------------------------------Material--------------------------------------------
         val emitTex : Texture2D = Texture2D("assets/textures/ground_emit.png", true)
@@ -151,14 +160,12 @@ class Scene(private val window: GameWindow) {
         groundRend.meshList.add(groundMesh)
         cycleRend.scaleLocal(Vector3f(0.8f))
 
-        //Skybox Mesh erzeugt
-        skyBoxMesh = Mesh(skyboxVertices, skyboxIndices, objVertexAttributes)
 
 
         tCamera.parent = cycleRend
 
 
-        tCamera.rotateLocal(Math.toRadians(-35.0f), 0.0f, 0.0f)
+        tCamera.rotateLocal(Math.toRadians(-10.0f), 0.0f, 0.0f)
         tCamera.translateLocal(Vector3f(0.0f, 0.5f, 4.0f))
 
 
@@ -177,29 +184,38 @@ class Scene(private val window: GameWindow) {
 
         spotlight2.parent = cycleRend
 
-
     }
 
 
     fun render(dt: Float, t: Float) {
 
         glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
+        // Skybox rendern
+        glDepthFunc(GL_LEQUAL)
+        skyboxShader.use()
+
+        skyboxShader.setUniform("view", tCamera.getCalculateViewMatrix(), false)
+        skyboxShader.setUniform("projection", tCamera.getCalculateProjectionMatrix(), false)
+
+        glBindVertexArray(cubeMap.skyboxVAO)
+        glActiveTexture(GL_TEXTURE0)
+        glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexture)
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0)
+
+        //skyboxShader.setUniform("skybox", cubeMapTexture)
+        glBindVertexArray(0);
+        glDepthFunc(GL_LESS);
+
+        // andere Sachen rendern
         staticShader.use()
         tCamera.bind(staticShader)
-        //sphereRend.render(staticShader)
         staticShader.setUniform("farbe", Vector3f(abs(sin(t)),abs(sin(t/2)),abs(sin(t/3))))
         cycleRend.render(staticShader)
         light.bind(staticShader, "byklePoint")
         spotlight.bind(staticShader, "bykleSpot", tCamera.getCalculateViewMatrix())
         staticShader.setUniform("farbe", Vector3f(0.0f,0.0f,0.0f))
         groundRend.render(staticShader)
-
-        // Skybox zeug
-        GL11.glDepthFunc(GL_LEQUAL)
-        skyboxShader.use()
-
     }
-
 
 
     fun update(dt: Float, t: Float) {
