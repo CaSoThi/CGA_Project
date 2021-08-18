@@ -41,14 +41,14 @@ class Scene(private val window: GameWindow) {
 
 
     // anstatt dem "flachen" Ground gewölbtes Ground Object verwednen?
-    private val resGround : OBJLoader.OBJResult = OBJLoader.loadOBJ("assets/models/ground.obj")
+    private val resGround : OBJLoader.OBJResult = OBJLoader.loadOBJ("project/assets/models/ground.obj")
     private val objMeshGround : OBJLoader.OBJMesh = resGround.objects[0].meshes[0]
 
     private var groundMesh : Mesh
 
 
     // anstatt des cycles den Character einfügen?
-    private var cycleRend = ModelLoader.loadModel("assets/Light Cycle/Light Cycle/HQ_Movie cycle.obj", Math.toRadians(-90.0f),Math.toRadians(90.0f), 0.0f) ?: throw IllegalArgumentException("Could not load the model")
+    private var cycleRend = ModelLoader.loadModel("project/assets/Light Cycle/Light Cycle/HQ_Movie cycle.obj", Math.toRadians(-90.0f),Math.toRadians(90.0f), 0.0f) ?: throw IllegalArgumentException("Could not load the model")
 
     private var groundRend = Renderable()
 
@@ -105,8 +105,8 @@ class Scene(private val window: GameWindow) {
 
     //scene setup
     init {
-        staticShader = ShaderProgram("assets/shaders/tron_vert.glsl", "assets/shaders/tron_frag.glsl")
-        skyboxShader = ShaderProgram("assets/shaders/skyBoxVert.glsl", "assets/shaders/skyBoxFrag.glsl")
+        staticShader = ShaderProgram("project/assets/shaders/tron_vert.glsl", "project/assets/shaders/tron_frag.glsl")
+        skyboxShader = ShaderProgram("project/assets/shaders/skyBoxVert.glsl", "project/assets/shaders/skyBoxFrag.glsl")
 
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
@@ -121,12 +121,12 @@ class Scene(private val window: GameWindow) {
 
         // Einzelne Faces der CubeMap laden
         val facesCubeMap : Vector<String> = Vector()
-        facesCubeMap.addAll(listOf("assets/textures/nz.png",
-                                    "assets/textures/pz.png",
-                                    "assets/textures/py.png",
-                                    "assets/textures/ny.png",
-                                    "assets/textures/px.png",
-                                    "assets/textures/nx.png"))
+        facesCubeMap.addAll(listOf("project/assets/textures/nz.png",
+                                    "project/assets/textures/pz.png",
+                                    "project/assets/textures/py.png",
+                                    "project/assets/textures/ny.png",
+                                    "project/assets/textures/px.png",
+                                    "project/assets/textures/nx.png"))
 
         cubeMapTexture = cubeMap.loadCubeMap(facesCubeMap)
 
@@ -143,9 +143,9 @@ class Scene(private val window: GameWindow) {
 
 
         //-------------------------------------Material--------------------------------------------
-        val emitTex : Texture2D = Texture2D("assets/textures/ground_emit.png", true)
-        val diffTex : Texture2D = Texture2D("assets/textures/ground_diff.png", true)
-        val specTex : Texture2D = Texture2D("assets/textures/ground_spec.png", true)
+        val emitTex : Texture2D = Texture2D("project/assets/textures/ground_emit.png", true)
+        val diffTex : Texture2D = Texture2D("project/assets/textures/ground_diff.png", true)
+        val specTex : Texture2D = Texture2D("project/assets/textures/ground_spec.png", true)
 
         val groundMaterial = Material(diffTex, emitTex, specTex, 60.0f, Vector2f(64.0f,64.0f))
 
