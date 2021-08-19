@@ -13,6 +13,7 @@ uniform vec2 tcMultiplier;
 
 //Position von Lights entgegen nehmen
 uniform vec3 byklePointLightPos;
+uniform vec3 starLightPos;
 uniform vec3 bykleSpotLightPos;
 uniform vec3 bykleSpot2LightPos;
 
@@ -46,7 +47,6 @@ void main(){
 
     vec4 lp3 = view_matrix * vec4(bykleSpot2LightPos, 1.0);
     vertexData.to2SpotLight = (lp3 - pos).xyz;
-
 
 
     gl_Position = proj_matrix * pos;

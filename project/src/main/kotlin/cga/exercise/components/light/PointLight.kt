@@ -2,6 +2,7 @@ package cga.exercise.components.light
 
 import cga.exercise.components.geometry.Transformable
 import cga.exercise.components.shader.ShaderProgram
+import org.joml.Matrix4f
 import org.joml.Vector3f
 
 open class PointLight(var lightPos : Vector3f = Vector3f(), var lightCol : Vector3f = Vector3f(),

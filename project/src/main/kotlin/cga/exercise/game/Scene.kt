@@ -28,6 +28,7 @@ import org.lwjgl.opengl.GL30.*
 import org.lwjgl.stb.STBImage
 import java.nio.IntBuffer
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.math.sin
 
 
@@ -59,7 +60,7 @@ class Scene(private val window: GameWindow) {
     private var light = PointLight(Vector3f(), Vector3f())
     private var spotlight = Spotlight(Vector3f(), Vector3f())
 
-    private var spotlight2 = Spotlight(Vector3f(), Vector3f())
+    //private var spotlight2 = Spotlight(Vector3f(), Vector3f())
 
 
     private var oldMousePosX: Double = -1.0
@@ -102,8 +103,15 @@ class Scene(private val window: GameWindow) {
     )
 
     private var cubeMap = CubemapTexture(skyboxVertices, skyboxIndices)
-
     var cubeMapTexture = glGenTextures()
+
+    // Collectable list
+    private var collectables : MutableList<Star>
+    private val collectableAmount : Int = 10
+
+    private var starMesh: Mesh
+    private var starRend =  Renderable()
+
 
     //scene setup
     init {
@@ -153,7 +161,7 @@ class Scene(private val window: GameWindow) {
         val diffTex = Texture2D("project/assets/textures/4k_venus_atmosphere.jpg", true)
         val specTex = Texture2D("project/assets/textures/4k_venus_atmosphere.jpg", true)
 
-        val groundMaterial = Material(diffTex, emitTex, specTex, 60.0f, Vector2f(1.0f, 1.0f))
+        val groundMaterial = Material(diffTex, emitTex, specTex, 10.0f, Vector2f(1.0f))
 
         emitTex.setTexParams(
             GL_REPEAT,
@@ -183,9 +191,10 @@ class Scene(private val window: GameWindow) {
         tCamera.translateLocal(Vector3f(0.0f, 0.5f, 4.0f))
 
 
+
         //----------------------------------------Licht------------------------------------------------
         light = PointLight(tCamera.getWorldPosition(), Vector3f(1.0f))
-        light.translateLocal(Vector3f(1.0f, -2.0f, 0.0f))
+        light.translateLocal(Vector3f(1.0f, -5.0f, 0.0f))
 
         light.parent = cycleRend
 
@@ -197,13 +206,50 @@ class Scene(private val window: GameWindow) {
         //spotlight2 = Spotlight(Vector3f(0.0f, 2.0f, -2.0f), Vector3f(1.0f))
         spotlight.rotateLocal(Math.toRadians(-10.0f), Math.PI.toFloat(), 0.0f)
         //spotlight2.parent = cycleRend
+
+
+
+        //-----------------------------------Collectables-------------------------------------------
+
+        val resStar: OBJLoader.OBJResult = OBJLoader.loadOBJ("project/assets/models/Star.obj")
+        val objStar: OBJLoader.OBJMesh = resStar.objects[0].meshes[0]
+        val starEmit = Texture2D("project/assets/textures/StarColor3.png", true)
+        val starDiff = Texture2D("project/assets/textures/StarColor3.png", true)
+        val starSpec = Texture2D("project/assets/textures/StarColor3.png", true)
+
+        val starMaterial = Material(starDiff, starEmit, starSpec, 40.0f, Vector2f(1.0f))
+
+        starEmit.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
+        starDiff.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
+        starSpec.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
+
+        starMesh = Mesh(objStar.vertexData, objStar.indexData, objVertexAttributes, starMaterial)
+
+        collectables = mutableListOf()
+        for (i in 1..collectableAmount) {
+            starRend.meshList.add(starMesh)
+            starRend.scaleLocal(Vector3f(0.8f))
+            starRend.rotateLocal(0.0f, 0.28f, 0.0f)
+
+
+            var starLight = PointLight(starRend.getWorldPosition(), Vector3f(0.0f, 0.0f, 1.0f))
+
+            var star = Star(starLight, starRend)
+
+            star.setPosition(groundRend.getWorldPosition().x + 5.1f,
+                    groundRend.getWorldPosition().y ,
+                    groundRend.getWorldPosition().z )
+
+            starRend.translateLocal(Vector3f(1.0f, 10f, 0.0f))
+            collectables.add(star)
+        }
     }
 
 
     fun render(dt: Float, t: Float) {
 
         glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
-        // Skybox rendern
+        // ------------Skybox rendern----------------------------
         glDepthFunc(GL_LEQUAL)
         skyboxShader.use()
 
@@ -233,6 +279,19 @@ class Scene(private val window: GameWindow) {
         staticShader.setUniform("farbe", Vector3f(0.0f, 0.0f, 0.0f))
         groundRend.render(staticShader)
 
+
+        //------------------collectables rendern----------------
+
+        for (star in collectables) {
+
+            // Collision Detection
+            if (star.distance(cycleRend) < 0.2f){
+                star.collect()
+            }
+            star.render(staticShader, "byklePoint")
+
+        }
+
     }
 
 
@@ -241,20 +300,25 @@ class Scene(private val window: GameWindow) {
 
         //light.lightCol = Vector3f(abs(sin(t)), abs(sin(t / 2)), abs(sin(t / 3)))
         if (window.getKeyState(GLFW_KEY_W)) {
-            cycleRend.rotateAroundPoint(0.0f, 0.0f, Math.toRadians(2.0f), groundRend.getWorldPosition())
+            cycleRend.rotateAroundPoint(0.0f, 0.0f, Math.toRadians(0.25f), groundRend.getWorldPosition())
         }
         if (window.getKeyState(GLFW_KEY_A)) {
-            cycleRend.rotateAroundPoint(0.0f, Math.toRadians(2.0f), 0.0f, groundRend.getWorldPosition())
+            cycleRend.rotateAroundPoint(0.0f, Math.toRadians(0.25f), 0.0f, groundRend.getWorldPosition())
         }
         if (window.getKeyState(GLFW_KEY_D)) {
-            cycleRend.rotateAroundPoint(0.0f, Math.toRadians(-2.0f), 0.0f, groundRend.getWorldPosition())
+            cycleRend.rotateAroundPoint(0.0f, Math.toRadians(-0.25f), 0.0f, groundRend.getWorldPosition())
         }
         if (window.getKeyState(GLFW_KEY_S)) {
-            cycleRend.rotateAroundPoint(0.0f, 0.0f, Math.toRadians(-2.0f), groundRend.getWorldPosition())
+            cycleRend.rotateAroundPoint(0.0f, 0.0f, Math.toRadians(-0.25f), groundRend.getWorldPosition())
         }
         if(window.getKeyState(GLFW_KEY_SPACE)) {
             cycleRend.translateLocal(Vector3f(0.0f, 0.0f, 0.0f))
            // cycleRend.translateLocal(Vector3f(0.0f, 5.0f, 0.0f))
+        }
+
+        // Animate stars
+        for (star in collectables) {
+            star.rotate(dt/4)
         }
     }
 

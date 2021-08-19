@@ -27,6 +27,13 @@
       </state>
     </system>
   </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Kotlin Class" />
+      </list>
+    </option>
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
@@ -43,6 +50,7 @@
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="H:\Uni\CGA_Project\project\assets\models" />
       <recent name="C:\Users\CatiSchmati\dev\CGA_Project\project\assets\models" />
     </key>
   </component>
@@ -72,7 +80,7 @@
       <workItem from="1629298718010" duration="1934000" />
       <workItem from="1629358119130" duration="1430000" />
       <workItem from="1629361244127" duration="5264000" />
-      <workItem from="1629367281917" duration="4516000" />
+      <workItem from="1629367281917" duration="18856000" />
     </task>
     <servers />
   </component>
