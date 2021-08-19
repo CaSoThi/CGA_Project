@@ -184,13 +184,14 @@ class Scene(private val window: GameWindow) {
 
 
         //----------------------------------------Licht------------------------------------------------
-        light = PointLight(tCamera.getWorldPosition(), Vector3f(1f, 1f, 1f))
+        light = PointLight(tCamera.getWorldPosition(), Vector3f(1.0f))
+        light.translateLocal(Vector3f(1.0f, -2.0f, 0.0f))
 
         light.parent = cycleRend
 
 
         // Spotlight mit Neigung in x und z Richtung
-        spotlight = Spotlight(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(1.0f))
+        spotlight = Spotlight(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(0.0f))
         spotlight.rotateLocal(Math.toRadians(-90.0f), Math.PI.toFloat(), 0.0f)
         spotlight.parent = cycleRend
         //spotlight2 = Spotlight(Vector3f(0.0f, 2.0f, -2.0f), Vector3f(1.0f))

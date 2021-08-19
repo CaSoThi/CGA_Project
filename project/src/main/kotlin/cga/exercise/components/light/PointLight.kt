@@ -5,7 +5,7 @@ import cga.exercise.components.shader.ShaderProgram
 import org.joml.Vector3f
 
 open class PointLight(var lightPos : Vector3f = Vector3f(), var lightCol : Vector3f = Vector3f(),
-                      var attParam : Vector3f = Vector3f(1.0f, 0.5f, 0.1f)): Transformable(), IPointLight{
+                      var attParam : Vector3f = Vector3f(1.2f, 0.5f, 0.1f)): Transformable(), IPointLight{
 
     init {
         // Positionierung des Pointlights im Weltkoordinatensystem durch übergebene Position lightPos
