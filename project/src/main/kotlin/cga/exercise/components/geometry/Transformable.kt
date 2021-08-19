@@ -162,6 +162,10 @@ open class Transformable(var parent : Transformable? = null) : ITransformable{
     override fun getLocalModelMatrix(): Matrix4f = Matrix4f(modelMat)
 
 
+    fun setPosition(x: Float, y: Float, z: Float) {
+        //model_matrix = Matrix4f().translate(Vector3f(x,y,z))
+        modelMat.setTranslation(x,y,z)
+    }
 }
 
 

@@ -1,4 +1,3 @@
-
 package cga.exercise.game
 
 
@@ -32,27 +31,29 @@ import java.util.*
 import kotlin.math.sin
 
 
-/**
- * Created by Fabian on 16.09.2017.
- */
 class Scene(private val window: GameWindow) {
     private val staticShader: ShaderProgram
-    private val skyboxShader : ShaderProgram
+    private val skyboxShader: ShaderProgram
 
 
     // anstatt dem "flachen" Ground gewölbtes Ground Object verwednen?
-    private val resGround : OBJLoader.OBJResult = OBJLoader.loadOBJ("project/assets/models/planet.obj")
-    private val objMeshGround : OBJLoader.OBJMesh = resGround.objects[0].meshes[0]
+    private val resGround: OBJLoader.OBJResult = OBJLoader.loadOBJ("project/assets/models/planet.obj")
+    private val objMeshGround: OBJLoader.OBJMesh = resGround.objects[0].meshes[0]
 
-    private var groundMesh : Mesh
+    private var groundMesh: Mesh
 
 
     // anstatt des cycles den Character einfügen?
-    private var cycleRend = ModelLoader.loadModel("project/assets/Light Cycle/Light Cycle/HQ_Movie cycle.obj", Math.toRadians(-90.0f),Math.toRadians(90.0f), 0.0f) ?: throw IllegalArgumentException("Could not load the model")
+    private var cycleRend = ModelLoader.loadModel(
+        "project/assets/Light Cycle/Light Cycle/HQ_Movie cycle.obj",
+        Math.toRadians(90.0f),
+        Math.toRadians(0.0f),
+        Math.toRadians(90.0f)
+    ) ?: throw IllegalArgumentException("Could not load the model")
 
     private var groundRend = Renderable()
 
-    private var tCamera  = TronCamera()
+    private var tCamera = TronCamera()
 
     //Anlegen des Pointlights
     private var light = PointLight(Vector3f(), Vector3f())
@@ -61,42 +62,43 @@ class Scene(private val window: GameWindow) {
     private var spotlight2 = Spotlight(Vector3f(), Vector3f())
 
 
-    private var oldMousePosX : Double = -1.0
-    private var oldMousePosY : Double = -1.0
-    private var einbool : Boolean = false
+    private var oldMousePosX: Double = -1.0
+    private var oldMousePosY: Double = -1.0
+    private var einbool: Boolean = false
 
 
     // Vertices und Indices der CubeMap festlegen
-    var size : Float = 500.0f
-    private var skyboxVertices : FloatArray  = floatArrayOf(
-            -size, -size, size,
-            size, -size, size,
-            size, -size, -size,
-            -size, -size, -size,
-            -size, size, size,
-            size, size, size,
-            size, size, -size,
-            -size, size, -size)
+    var size: Float = 500.0f
+    private var skyboxVertices: FloatArray = floatArrayOf(
+        -size, -size, size,
+        size, -size, size,
+        size, -size, -size,
+        -size, -size, -size,
+        -size, size, size,
+        size, size, size,
+        size, size, -size,
+        -size, size, -size
+    )
 
-    private var skyboxIndices : IntArray = intArrayOf(
-            //right
-            1, 2, 6,
-            6, 5, 1,
-            //left
-            0, 4, 7,
-            7, 3, 0,
-            //top
-            4, 5, 6,
-            6, 7, 4,
-            //bottom
-            0, 3, 2,
-            2, 1, 0,
-            //back
-            0, 1, 5,
-            5, 4, 0,
-            //front
-            3, 7, 6,
-            6, 2, 3
+    private var skyboxIndices: IntArray = intArrayOf(
+        //right
+        1, 2, 6,
+        6, 5, 1,
+        //left
+        0, 4, 7,
+        7, 3, 0,
+        //top
+        4, 5, 6,
+        6, 7, 4,
+        //bottom
+        0, 3, 2,
+        2, 1, 0,
+        //back
+        0, 1, 5,
+        5, 4, 0,
+        //front
+        3, 7, 6,
+        6, 2, 3
     )
 
     private var cubeMap = CubemapTexture(skyboxVertices, skyboxIndices)
@@ -120,13 +122,17 @@ class Scene(private val window: GameWindow) {
         //-------------------------------------CubeMap--------------------------------------------
 
         // Einzelne Faces der CubeMap laden
-        val facesCubeMap : Vector<String> = Vector()
-        facesCubeMap.addAll(listOf("project/assets/textures/nz.png",
-                                    "project/assets/textures/pz.png",
-                                    "project/assets/textures/py.png",
-                                    "project/assets/textures/ny.png",
-                                    "project/assets/textures/px.png",
-                                    "project/assets/textures/nx.png"))
+        val facesCubeMap: Vector<String> = Vector()
+        facesCubeMap.addAll(
+            listOf(
+                "project/assets/textures/nz.png",
+                "project/assets/textures/pz.png",
+                "project/assets/textures/py.png",
+                "project/assets/textures/ny.png",
+                "project/assets/textures/px.png",
+                "project/assets/textures/nx.png"
+            )
+        )
 
         cubeMapTexture = cubeMap.loadCubeMap(facesCubeMap)
 
@@ -136,57 +142,59 @@ class Scene(private val window: GameWindow) {
         //Erzeugen der Sphere Attribute
         val stride = 8 * 4
         val attrPos = VertexAttribute(3, GL_FLOAT, stride, 0)
-        val attrTC = VertexAttribute(2, GL_FLOAT, stride, 3*4)
-        val attrNorm = VertexAttribute(3, GL_FLOAT, stride, 5*4)
+        val attrTC = VertexAttribute(2, GL_FLOAT, stride, 3 * 4)
+        val attrNorm = VertexAttribute(3, GL_FLOAT, stride, 5 * 4)
 
         val objVertexAttributes = arrayOf(attrPos, attrTC, attrNorm)
 
 
         //-------------------------------------Material--------------------------------------------
-        val emitTex : Texture2D = Texture2D("project/assets/textures/ground_emit.png", true)
-        val diffTex : Texture2D = Texture2D("project/assets/textures/ground_diff.png", true)
-        val specTex : Texture2D = Texture2D("project/assets/textures/ground_spec.png", true)
+        val emitTex = Texture2D("project/assets/textures/4k_venus_atmosphere.jpg", true)
+        val diffTex = Texture2D("project/assets/textures/4k_venus_atmosphere.jpg", true)
+        val specTex = Texture2D("project/assets/textures/4k_venus_atmosphere.jpg", true)
 
-        val groundMaterial = Material(diffTex, emitTex, specTex, 60.0f, Vector2f(64.0f,64.0f))
+        val groundMaterial = Material(diffTex, emitTex, specTex, 60.0f, Vector2f(1.0f, 1.0f))
 
-        emitTex.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)     //Linear = zwischen farbwerten interpolieren
+        emitTex.setTexParams(
+            GL_REPEAT,
+            GL_REPEAT,
+            GL11.GL_LINEAR_MIPMAP_LINEAR,
+            GL_LINEAR
+        )     //Linear = zwischen farbwerten interpolieren
         diffTex.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
         specTex.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
-
-
 
         groundMesh = Mesh(objMeshGround.vertexData, objMeshGround.indexData, objVertexAttributes, groundMaterial)
 
         groundRend.meshList.add(groundMesh)
-        groundRend.scaleLocal(Vector3f(2.0f))
-        cycleRend.scaleLocal(Vector3f(0.8f))
-
-        cycleRend.parent = groundRend
-
-
+        groundRend.scaleLocal(Vector3f(5.0f))
+        cycleRend.scaleLocal(Vector3f(0.1f))
+        //cycleRend.rotateLocal(Math.toRadians(0.0f), Math.toRadians(90.0f), Math.toRadians(0.0f))
+        //     cycleRend.parent = groundRend
+        cycleRend.setPosition(
+            groundRend.getWorldPosition().x + 5,
+            groundRend.getWorldPosition().y,
+            groundRend.getWorldPosition().z
+        )
 
         tCamera.parent = cycleRend
 
-
-        tCamera.rotateLocal(Math.toRadians(-10.0f), 0.0f, 0.0f)
+        tCamera.rotateLocal(Math.toRadians(90.0f), Math.toRadians(45.0f), Math.toRadians(-90.0f))
         tCamera.translateLocal(Vector3f(0.0f, 0.5f, 4.0f))
 
 
         //----------------------------------------Licht------------------------------------------------
-        light = PointLight(tCamera.getWorldPosition(), Vector3f(1f,1f,0f))
-        light.parent = cycleRend
+        light = PointLight(tCamera.getWorldPosition(), Vector3f(1f, 10f, 0f))
+
 
 
         // Spotlight mit Neigung in x und z Richtung
         spotlight = Spotlight(Vector3f(0.0f, 0.0f, -2.0f), Vector3f(1.0f))
         spotlight.rotateLocal(Math.toRadians(-10.0f), Math.PI.toFloat(), 0.0f)
         spotlight.parent = cycleRend
-
         spotlight2 = Spotlight(Vector3f(0.0f, 2.0f, -2.0f), Vector3f(1.0f))
         spotlight.rotateLocal(Math.toRadians(-10.0f), Math.PI.toFloat(), 0.0f)
-
         spotlight2.parent = cycleRend
-
     }
 
 
@@ -212,51 +220,52 @@ class Scene(private val window: GameWindow) {
         // andere Sachen rendern
         staticShader.use()
         tCamera.bind(staticShader)
-        staticShader.setUniform("farbe", Vector3f(abs(sin(t)),abs(sin(t/2)),abs(sin(t/3))))
+        staticShader.setUniform("farbe", Vector3f(abs(sin(t)), abs(sin(t / 2)), abs(sin(t / 3))))
+
+
+
         cycleRend.render(staticShader)
         light.bind(staticShader, "byklePoint")
         spotlight.bind(staticShader, "bykleSpot", tCamera.getCalculateViewMatrix())
-        staticShader.setUniform("farbe", Vector3f(0.0f,0.0f,0.0f))
+        staticShader.setUniform("farbe", Vector3f(0.0f, 0.0f, 0.0f))
         groundRend.render(staticShader)
+
     }
 
 
     fun update(dt: Float, t: Float) {
         //Farbe des Motorads wird verändert in Abhängigkeit der Zeit mit sinuswerten
 
-        light.lightCol = Vector3f(abs(sin(t)),abs(sin(t/2)),abs(sin(t/3)))
-        if(window.getKeyState(GLFW_KEY_W)){
-            cycleRend.translateLocal(Vector3f(0.0f, 0.0f, -5*dt))
-            if(window.getKeyState(GLFW_KEY_A)){
-                cycleRend.rotateLocal(0.0f, 2f*dt, 0.0f)
-            }
-            if(window.getKeyState(GLFW_KEY_D)){
-                cycleRend.rotateLocal(0.0f, -2f*dt, 0.0f)
-            }
+        light.lightCol = Vector3f(abs(sin(t)), abs(sin(t / 2)), abs(sin(t / 3)))
+        if (window.getKeyState(GLFW_KEY_W)) {
+            cycleRend.rotateAroundPoint(0.0f, 0.0f, Math.toRadians(2.0f), groundRend.getWorldPosition())
         }
-        if(window.getKeyState(GLFW_KEY_S)){
-            cycleRend.translateLocal(Vector3f(0.0f, 0.0f, 5*dt))
-            if(window.getKeyState(GLFW_KEY_A)){
-                cycleRend.rotateLocal(0.0f, 2f*dt, 0.0f)
-            }
-            if(window.getKeyState(GLFW_KEY_D)){
-                cycleRend.rotateLocal(0.0f, -2f*dt, 0.0f)
-            }
+        if (window.getKeyState(GLFW_KEY_A)) {
+            cycleRend.rotateAroundPoint(0.0f, Math.toRadians(2.0f), 0.0f, groundRend.getWorldPosition())
         }
-
+        if (window.getKeyState(GLFW_KEY_D)) {
+            cycleRend.rotateAroundPoint(0.0f, Math.toRadians(-2.0f), 0.0f, groundRend.getWorldPosition())
+        }
+        if (window.getKeyState(GLFW_KEY_S)) {
+            cycleRend.rotateAroundPoint(0.0f, 0.0f, Math.toRadians(-2.0f), groundRend.getWorldPosition())
+        }
+        if(window.getKeyState(GLFW_KEY_SPACE)) {
+            cycleRend.translateLocal(Vector3f(0.0f, 0.0f, 0.0f))
+           // cycleRend.translateLocal(Vector3f(0.0f, 5.0f, 0.0f))
+        }
     }
 
     fun onKey(key: Int, scancode: Int, action: Int, mode: Int) {}
 
     fun onMouseMove(xpos: Double, ypos: Double) {
         //Bewegung in x Richtung durch Differenz zwischen alter und neuer Position
-        var deltaX : Double = xpos - oldMousePosX
-        var deltaY : Double = ypos - oldMousePosY
+        var deltaX: Double = xpos - oldMousePosX
+        var deltaY: Double = ypos - oldMousePosY
         oldMousePosX = xpos
         oldMousePosY = ypos
 
-        if(einbool){
-            tCamera.rotateAroundPoint(0.0f, Math.toRadians(deltaX.toFloat()*0.05f), 0.0f, Vector3f(0.0f))
+        if (einbool) {
+            tCamera.rotateAroundPoint(0.0f, Math.toRadians(deltaX.toFloat() * 0.05f), 0.0f, Vector3f(0.0f))
         }
         einbool = true
 
