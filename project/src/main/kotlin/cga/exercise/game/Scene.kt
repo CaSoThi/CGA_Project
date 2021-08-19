@@ -4,7 +4,7 @@ package cga.exercise.game
 import cga.exercise.components.camera.TronCamera
 import cga.exercise.components.geometry.*
 import cga.exercise.components.light.PointLight
-import cga.exercise.components.light.Spotlight
+import cga.exercise.components.light.SpotLight
 import cga.exercise.components.shader.ShaderProgram
 import cga.exercise.components.texture.CubemapTexture
 import cga.exercise.components.texture.Texture2D
@@ -12,24 +12,14 @@ import cga.framework.GLError
 import cga.framework.GameWindow
 import cga.framework.ModelLoader
 import cga.framework.OBJLoader
-import org.joml.Matrix4f
 import org.joml.Vector3f
 import org.lwjgl.opengl.GL11
-import org.lwjgl.opengl.GL15.*
-import kotlin.math.abs
 import org.joml.Math
 import org.joml.Vector2f
-import org.lwjgl.BufferUtils
 import org.lwjgl.glfw.GLFW.*
-import org.lwjgl.opengl.AMDSeamlessCubemapPerTexture.GL_TEXTURE_CUBE_MAP_SEAMLESS
-import org.lwjgl.opengl.ARBTextureStorage.glTexStorage2D
-import org.lwjgl.opengl.GL20
 import org.lwjgl.opengl.GL30.*
-import org.lwjgl.stb.STBImage
-import java.nio.IntBuffer
 import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.math.sin
+import kotlin.random.Random;
 
 
 class Scene(private val window: GameWindow) {
@@ -58,7 +48,7 @@ class Scene(private val window: GameWindow) {
 
     //Anlegen des Pointlights
     private var light = PointLight(Vector3f(), Vector3f())
-    private var spotlight = Spotlight(Vector3f(), Vector3f())
+    private var spotlight = SpotLight(Vector3f(), Vector3f())
 
     //private var spotlight2 = Spotlight(Vector3f(), Vector3f())
 
@@ -108,9 +98,7 @@ class Scene(private val window: GameWindow) {
     // Collectable list
     private var collectables : MutableList<Star>
     private val collectableAmount : Int = 10
-
-    private var starMesh: Mesh
-    private var starRend =  Renderable()
+    private var score : Int = 0
 
 
     //scene setup
@@ -147,7 +135,7 @@ class Scene(private val window: GameWindow) {
         // ---------------------------------------------------------------------------------------
 
 
-        //Erzeugen der Sphere Attribute
+        //Erzeugen der Vertex Attribute
         val stride = 8 * 4
         val attrPos = VertexAttribute(3, GL_FLOAT, stride, 0)
         val attrTC = VertexAttribute(2, GL_FLOAT, stride, 3 * 4)
@@ -200,7 +188,7 @@ class Scene(private val window: GameWindow) {
 
 
         // Spotlight mit Neigung in x und z Richtung
-        spotlight = Spotlight(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(0.0f))
+        spotlight = SpotLight(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(0.0f))
         spotlight.rotateLocal(Math.toRadians(-90.0f), Math.PI.toFloat(), 0.0f)
         spotlight.parent = cycleRend
         //spotlight2 = Spotlight(Vector3f(0.0f, 2.0f, -2.0f), Vector3f(1.0f))
@@ -211,28 +199,35 @@ class Scene(private val window: GameWindow) {
 
         //-----------------------------------Collectables-------------------------------------------
 
-        val resStar: OBJLoader.OBJResult = OBJLoader.loadOBJ("project/assets/models/Star.obj")
-        val objStar: OBJLoader.OBJMesh = resStar.objects[0].meshes[0]
         val starEmit = Texture2D("project/assets/textures/StarColor3.png", true)
         val starDiff = Texture2D("project/assets/textures/StarColor3.png", true)
         val starSpec = Texture2D("project/assets/textures/StarColor3.png", true)
-
-        val starMaterial = Material(starDiff, starEmit, starSpec, 40.0f, Vector2f(1.0f))
 
         starEmit.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
         starDiff.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
         starSpec.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
 
-        starMesh = Mesh(objStar.vertexData, objStar.indexData, objVertexAttributes, starMaterial)
+        val starMaterial = Material(starDiff, starEmit, starSpec, 40.0f, Vector2f(1.0f))
+
 
         collectables = mutableListOf()
         for (i in 1..collectableAmount) {
+            val resStar: OBJLoader.OBJResult = OBJLoader.loadOBJ("project/assets/models/Star2.obj")
+            val objStar: OBJLoader.OBJMesh = resStar.objects[0].meshes[0]
+
+            val starMesh = Mesh(objStar.vertexData, objStar.indexData, objVertexAttributes, starMaterial)
+            var starRend = Renderable()
+
             starRend.meshList.add(starMesh)
-            starRend.scaleLocal(Vector3f(0.8f))
-            starRend.rotateLocal(0.0f, 0.28f, 0.0f)
 
+            starRend.scaleLocal(Vector3f(0.1f))
+            //starRend.rotateLocal(0.0f, 2.8f, 0.0f)
 
-            var starLight = PointLight(starRend.getWorldPosition(), Vector3f(0.0f, 0.0f, 1.0f))
+            var starLight = PointLight(starRend.getWorldPosition(), Vector3f(1f, 0f, 0f)) // Light works theoretically but is in object?
+
+            starLight.parent = starRend
+
+            starLight.translateLocal(Vector3f(1.0f, -15.0f, 1.0f))
 
             var star = Star(starLight, starRend)
 
@@ -240,7 +235,11 @@ class Scene(private val window: GameWindow) {
                     groundRend.getWorldPosition().y ,
                     groundRend.getWorldPosition().z )
 
-            starRend.translateLocal(Vector3f(1.0f, 10f, 0.0f))
+            val randomX = Random.nextFloat() * 360f
+            val randomY = Random.nextFloat() * 360f
+
+            star.rotateAroundPoint(0.0f, randomX, randomY, groundRend.getWorldPosition())
+
             collectables.add(star)
         }
     }
@@ -286,7 +285,10 @@ class Scene(private val window: GameWindow) {
 
             // Collision Detection
             if (star.distance(cycleRend) < 0.2f){
-                star.collect()
+                if (star.collect()) {
+                    score++
+                    println(score)
+                }
             }
             star.render(staticShader, "byklePoint")
 
@@ -318,7 +320,7 @@ class Scene(private val window: GameWindow) {
 
         // Animate stars
         for (star in collectables) {
-            star.rotate(dt/4)
+            star.rotate(dt/2)
         }
     }
 

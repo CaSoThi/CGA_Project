@@ -1,6 +1,7 @@
 package cga.exercise.components.geometry
 
 import cga.exercise.components.light.PointLight
+import cga.exercise.components.light.SpotLight
 import cga.exercise.components.shader.ShaderProgram
 import org.joml.Math
 import org.joml.Vector3f
@@ -15,7 +16,6 @@ class Star(light : PointLight, collectableObject: Renderable) {
     init {
         this.collectableObject = collectableObject
         this.pointLight = light
-        this.pointLight.parent = collectableObject
         this.collected = false
     }
 
@@ -38,7 +38,7 @@ class Star(light : PointLight, collectableObject: Renderable) {
         return distance.toFloat()
     }
 
-    fun setPosition(x: Float, y: Float, z: Float) {
+     fun setPosition(x: Float, y: Float, z: Float) {
         this.collectableObject.setPosition(x, y, z)
         this.pointLight.setPosition(x, y + 1f, z)
     }
@@ -47,8 +47,20 @@ class Star(light : PointLight, collectableObject: Renderable) {
       collectableObject.rotateLocal(amount, 0.0f, 0.0f)
     }
 
-    fun collect() {
-        this.collected = true
+    fun rotateAroundPoint(pitch: Float, yaw: Float, roll: Float, altMidpoint: Vector3f) {
+        this.collectableObject.rotateAroundPoint(pitch, yaw, roll, altMidpoint)
+        // When taking the center of the planet as the center:
+        // pitch:
+        // yaw: left / right from player
+        // roll: front / back from player
+    }
 
+    fun collect() : Boolean {
+        return if (collected) {
+            false
+        } else {
+            this.collected = true
+            true
+        }
     }
 }
