@@ -184,17 +184,18 @@ class Scene(private val window: GameWindow) {
 
 
         //----------------------------------------Licht------------------------------------------------
-        light = PointLight(tCamera.getWorldPosition(), Vector3f(1f, 10f, 0f))
+        light = PointLight(tCamera.getWorldPosition(), Vector3f(1f, 1f, 1f))
 
+        light.parent = cycleRend
 
 
         // Spotlight mit Neigung in x und z Richtung
-        spotlight = Spotlight(Vector3f(0.0f, 0.0f, -2.0f), Vector3f(1.0f))
-        spotlight.rotateLocal(Math.toRadians(-10.0f), Math.PI.toFloat(), 0.0f)
+        spotlight = Spotlight(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(1.0f))
+        spotlight.rotateLocal(Math.toRadians(-90.0f), Math.PI.toFloat(), 0.0f)
         spotlight.parent = cycleRend
-        spotlight2 = Spotlight(Vector3f(0.0f, 2.0f, -2.0f), Vector3f(1.0f))
+        //spotlight2 = Spotlight(Vector3f(0.0f, 2.0f, -2.0f), Vector3f(1.0f))
         spotlight.rotateLocal(Math.toRadians(-10.0f), Math.PI.toFloat(), 0.0f)
-        spotlight2.parent = cycleRend
+        //spotlight2.parent = cycleRend
     }
 
 
@@ -220,8 +221,9 @@ class Scene(private val window: GameWindow) {
         // andere Sachen rendern
         staticShader.use()
         tCamera.bind(staticShader)
-        staticShader.setUniform("farbe", Vector3f(abs(sin(t)), abs(sin(t / 2)), abs(sin(t / 3))))
+        //staticShader.setUniform("farbe", Vector3f(abs(sin(t)), abs(sin(t / 2)), abs(sin(t / 3))))
 
+        staticShader.setUniform("farbe", Vector3f(1.0f))
 
 
         cycleRend.render(staticShader)
@@ -236,7 +238,7 @@ class Scene(private val window: GameWindow) {
     fun update(dt: Float, t: Float) {
         //Farbe des Motorads wird verändert in Abhängigkeit der Zeit mit sinuswerten
 
-        light.lightCol = Vector3f(abs(sin(t)), abs(sin(t / 2)), abs(sin(t / 3)))
+        //light.lightCol = Vector3f(abs(sin(t)), abs(sin(t / 2)), abs(sin(t / 3)))
         if (window.getKeyState(GLFW_KEY_W)) {
             cycleRend.rotateAroundPoint(0.0f, 0.0f, Math.toRadians(2.0f), groundRend.getWorldPosition())
         }
