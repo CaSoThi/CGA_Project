@@ -13,7 +13,6 @@ uniform vec2 tcMultiplier;
 
 //Position von Lights entgegen nehmen
 uniform vec3 byklePointLightPos;
-uniform vec3 starLightPos;
 uniform vec3 bykleSpotLightPos;
 uniform vec3 bykleSpot2LightPos;
 

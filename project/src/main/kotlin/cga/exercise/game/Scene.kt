@@ -12,10 +12,8 @@ import cga.framework.GLError
 import cga.framework.GameWindow
 import cga.framework.ModelLoader
 import cga.framework.OBJLoader
-import org.joml.Vector3f
+import org.joml.*
 import org.lwjgl.opengl.GL11
-import org.joml.Math
-import org.joml.Vector2f
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.GL30.*
 import java.util.*
@@ -105,7 +103,6 @@ class Scene(private val window: GameWindow) {
     init {
         staticShader = ShaderProgram("project/assets/shaders/tron_vert.glsl", "project/assets/shaders/tron_frag.glsl")
         skyboxShader = ShaderProgram("project/assets/shaders/skyBoxVert.glsl", "project/assets/shaders/skyBoxFrag.glsl")
-
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
         glDisable(GL_CULL_FACE); GLError.checkThrow()
@@ -229,7 +226,7 @@ class Scene(private val window: GameWindow) {
 
             starLight.translateLocal(Vector3f(1.0f, -1.0f, 1.0f))
 
-            var star = Star(starLight, starRend, starMaterial)
+            var star = Star(starLight, starRend, starMaterial, i)
 
             star.setPosition(groundRend.getWorldPosition().x + 5.1f,
                     groundRend.getWorldPosition().y ,
@@ -281,17 +278,9 @@ class Scene(private val window: GameWindow) {
 
         //------------------collectables rendern----------------
 
-        for (star in collectables) {
 
-            // Collision Detection
-            if (star.distance(cycleRend) < 0.2f){
-                if (star.collect()) {
-                    score++
-                    println(score)
-                }
-            }
-            star.render(staticShader, "byklePoint")
-
+        for (i in 0 until collectableAmount) {
+            collectables[i].render(staticShader, "byklePoint")
         }
 
     }
@@ -323,8 +312,15 @@ class Scene(private val window: GameWindow) {
             //}
         }
 
-        // Animate stars
+        // Animate stars & check collision
         for (star in collectables) {
+            // Collision Detection
+            if (star.distance(cycleRend) < 0.2f){
+                if (star.collect()) {
+                    score++
+                    println(score)
+                }
+            }
             star.rotate(dt/2)
         }
     }
