@@ -56,7 +56,8 @@ class Scene(private val window: GameWindow) {
     private var oldMousePosX: Double = -1.0
     private var oldMousePosY: Double = -1.0
     private var einbool: Boolean = false
-
+    private var jumpUp = true;
+    private var jumpDown = true;
 
     // Vertices und Indices der CubeMap festlegen
     var size: Float = 500.0f
@@ -314,13 +315,9 @@ class Scene(private val window: GameWindow) {
             cycleRend.rotateAroundPoint(0.0f, 0.0f, Math.toRadians(-0.25f), groundRend.getWorldPosition())
         }
         if(window.getKeyState(GLFW_KEY_SPACE)) {
-            val acc = -9.8;
-            var vel = acc*dt;
-            val pos = vel*dt;
-            cycleRend.translateLocal(Vector3f(0.0f, 0.0f, pos.toFloat()))
-            //for(i in 0..10) {
-             //   cycleRend.translateLocal(Vector3f(0.0f, 0.0f, -i.toFloat()))
-            //}
+            //println(cycleRend.getWorldPosition().z == groundRend.getWorldPosition().z+5.1f)
+
+            gravityJump(dt)
         }
 
         // Animate stars
@@ -329,13 +326,56 @@ class Scene(private val window: GameWindow) {
         }
     }
 
-    fun gravityJump() {
-        for(i in 0..10) {
-            cycleRend.translateLocal(Vector3f(0.0f, 0.0f, i.toFloat()))
+    fun gravityJump(dt: Float) {
+        //Euler's method for numerical integration
+        /*val acc = 9.8;
+        var vel = acc*dt;
+        val pos = vel*dt;
+        println(pos)*/
+        var i =0;
+        val curPos = cycleRend.getWorldPosition();
+        if(jumpUp) {
+            cycleRend.translateLocal(Vector3f(cycleRend.getWorldPosition().x*dt*100.0f, 0.0f,0.0f))
+            cycleRend.translateLocal(Vector3f(0.0f, cycleRend.getWorldPosition().y*dt*100.0f,0.0f))
+            jumpUp = false
+            jumpDown = true
+            println("UP")
         }
-        for(i in 0..10) {
-            cycleRend.translateLocal(Vector3f(0.0f, 0.0f, -i.toFloat()))
+        Timer().schedule(object : TimerTask() {
+            override fun run() {
+                cycleRend.setPosition(curPos.x, curPos.y, curPos.z)
+
+                jumpUp = true
+                jumpDown = false
+            }
+        }, 500)
+
+
+
+       /* if(jumpDown) {
+            cycleRend.translateLocal(Vector3f(-cycleRend.getWorldPosition().x*dt, 0.0f,0.0f))
+            cycleRend.translateLocal(Vector3f(0.0f, -cycleRend.getWorldPosition().y*dt,0.0f))
+            jumpUp = true
+            jumpDown = false
+            println("DOWN")
+        }*/
+
+        /*while(startLoop) {
+
+            cycleRend.translateLocal(Vector3f(cycleRend.getWorldPosition().x*dt, 0.0f,0.0f))
+            cycleRend.translateLocal(Vector3f(0.0f, cycleRend.getWorldPosition().y*dt,0.0f))
+            i++;
+            if(i == 100) {
+                startLoop = false
+            }
+        }*/
+
+
+        if(cycleRend.getWorldPosition().y > 10 ) {
+            println("TST")
         }
+
+     //  cycleRend.translateLocal(Vector3f(0.0f, 0.0f, pos.toFloat()))
     }
 
     fun onKey(key: Int, scancode: Int, action: Int, mode: Int) {}
