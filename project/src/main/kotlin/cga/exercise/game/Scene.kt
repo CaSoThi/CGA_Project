@@ -108,6 +108,8 @@ class Scene(private val window: GameWindow) {
     private var earthMesh: Mesh
     private var earthRend = Renderable()
 
+    private var ufoMesh: Mesh
+    private var ufoRend = Renderable()
 
 
     //scene setup
@@ -141,8 +143,6 @@ class Scene(private val window: GameWindow) {
         cubeMapTexture = cubeMap.loadCubeMap(facesCubeMap)
 
         // ---------------------------------------------------------------------------------------
-
-
         //Erzeugen der Vertex Attribute
         val stride = 8 * 4
         val attrPos = VertexAttribute(3, GL_FLOAT, stride, 0)
@@ -150,7 +150,6 @@ class Scene(private val window: GameWindow) {
         val attrNorm = VertexAttribute(3, GL_FLOAT, stride, 5 * 4)
 
         val objVertexAttributes = arrayOf(attrPos, attrTC, attrNorm)
-
 
         //-------------------------------------Material--------------------------------------------
         val emitTex = Texture2D("project/assets/textures/4k_venus_atmosphere.jpg", true)
@@ -272,7 +271,6 @@ class Scene(private val window: GameWindow) {
         saturnRend.translateGlobal(Vector3f(0.0f, 15.0f, 10.0f))
         saturnRend.rotateLocal(0.0f, 0.0f, 2.0f)
 
-
         val resNeptune: OBJLoader.OBJResult = OBJLoader.loadOBJ("project/assets/models/planet.obj")
         val objMeshNeptune: OBJLoader.OBJMesh = resNeptune.objects[0].meshes[0]
 
@@ -312,6 +310,26 @@ class Scene(private val window: GameWindow) {
         earthRend.scaleLocal(Vector3f(2.0f))
         earthRend.translateGlobal(Vector3f(-14.0f, -5.0f, 6.0f))
         //earthRend.rotateLocal(0.0f, 0.0f, 2.0f)
+
+        val resUfo: OBJLoader.OBJResult = OBJLoader.loadOBJ("project/assets/models/ufo.obj")
+        val objMeshUfo: OBJLoader.OBJMesh = resUfo.objects[0].meshes[0]
+
+        val ufoEmit = Texture2D("project/assets/textures/ufo.jpg", true)
+        val ufoDiff = Texture2D("project/assets/textures/ufo.jpg", true)
+        val ufoSpec = Texture2D("project/assets/textures/ufo.jpg", true)
+
+        val ufoMaterial = Material(ufoDiff, ufoEmit, ufoSpec, 10.0f, Vector2f(1.0f))
+
+        ufoEmit.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
+        ufoDiff.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
+        ufoSpec.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
+
+        ufoMesh = Mesh(objMeshUfo.vertexData, objMeshUfo.indexData, objVertexAttributes, ufoMaterial)
+
+        ufoRend.meshList.add(ufoMesh)
+        ufoRend.scaleLocal(Vector3f(0.5f))
+        ufoRend.translateGlobal(Vector3f(14.0f, -6.0f, -12.0f))
+        ufoRend.rotateLocal(0.0f, 0.0f, 3.0f)
     }
 
 
@@ -351,6 +369,7 @@ class Scene(private val window: GameWindow) {
         saturnRend.render(staticShader)
         neptuneRend.render(staticShader)
         earthRend.render(staticShader)
+        ufoRend.render(staticShader)
 
 
         //------------------collectables rendern-------------------------
@@ -400,6 +419,12 @@ class Scene(private val window: GameWindow) {
             }
             star.rotate(dt)
         }
+
+        //Background Objects
+        ufoRend.rotateAroundPoint(dt/20, 0.0f, 0.0f,  groundRend.getWorldPosition())
+        earthRend.rotateAroundPoint(dt/20, 0.0f, 0.0f,  groundRend.getWorldPosition())
+        neptuneRend.rotateAroundPoint(dt/20, 0.0f, 0.0f,  groundRend.getWorldPosition())
+        saturnRend.rotateAroundPoint(dt/20, 0.0f, 0.0f,  groundRend.getWorldPosition())
     }
 
     fun gravityJump() {
