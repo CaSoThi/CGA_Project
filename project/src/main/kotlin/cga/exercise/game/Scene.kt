@@ -98,6 +98,17 @@ class Scene(private val window: GameWindow) {
     private val collectableAmount : Int = 20
     private var score : Int = 0
 
+    //Background Objects
+    private var saturnMesh: Mesh
+    private var saturnRend = Renderable()
+
+    private var neptuneMesh: Mesh
+    private var neptuneRend = Renderable()
+
+    private var earthMesh: Mesh
+    private var earthRend = Renderable()
+
+
 
     //scene setup
     init {
@@ -239,13 +250,75 @@ class Scene(private val window: GameWindow) {
 
             collectables.add(star)
         }
+
+        //-----------------------Background Objects--------------------------------------------------
+        val resSaturn: OBJLoader.OBJResult = OBJLoader.loadOBJ("project/assets/models/saturn2.obj")
+        val objMeshSaturn: OBJLoader.OBJMesh = resSaturn.objects[0].meshes[0]
+
+        val saturnEmit = Texture2D("project/assets/textures/2k_saturn.jpg", true)
+        val saturnDiff = Texture2D("project/assets/textures/2k_saturn.jpg", true)
+        val saturnSpec = Texture2D("project/assets/textures/2k_saturn.jpg", true)
+
+        val saturnMaterial = Material(saturnDiff, saturnEmit, saturnSpec, 10.0f, Vector2f(1.0f))
+
+        saturnEmit.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
+        saturnDiff.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
+        saturnSpec.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
+
+        saturnMesh = Mesh(objMeshSaturn.vertexData, objMeshSaturn.indexData, objVertexAttributes, saturnMaterial)
+
+        saturnRend.meshList.add(saturnMesh)
+        saturnRend.scaleLocal(Vector3f(2.0f))
+        saturnRend.translateGlobal(Vector3f(0.0f, 15.0f, 10.0f))
+        saturnRend.rotateLocal(0.0f, 0.0f, 2.0f)
+
+
+        val resNeptune: OBJLoader.OBJResult = OBJLoader.loadOBJ("project/assets/models/planet.obj")
+        val objMeshNeptune: OBJLoader.OBJMesh = resNeptune.objects[0].meshes[0]
+
+        val neptuneEmit = Texture2D("project/assets/textures/2k_neptune.jpg", true)
+        val neptuneDiff = Texture2D("project/assets/textures/2k_neptune.jpg", true)
+        val neptuneSpec = Texture2D("project/assets/textures/2k_neptune.jpg", true)
+
+        val neptuneMaterial = Material(neptuneDiff, neptuneEmit, neptuneSpec, 10.0f, Vector2f(1.0f))
+
+        neptuneEmit.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
+        neptuneDiff.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
+        neptuneSpec.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
+
+        neptuneMesh = Mesh(objMeshNeptune.vertexData, objMeshNeptune.indexData, objVertexAttributes, neptuneMaterial)
+
+        neptuneRend.meshList.add(neptuneMesh)
+        neptuneRend.scaleLocal(Vector3f(2.0f))
+        neptuneRend.translateGlobal(Vector3f(0.0f, -10.0f, -8.0f))
+        neptuneRend.rotateLocal(0.0f, 0.0f, 2.0f)
+
+        val resEarth: OBJLoader.OBJResult = OBJLoader.loadOBJ("project/assets/models/planet.obj")
+        val objMeshEarth: OBJLoader.OBJMesh = resEarth.objects[0].meshes[0]
+
+        val earthEmit = Texture2D("project/assets/textures/2k_earth_daymap.jpg", true)
+        val earthDiff = Texture2D("project/assets/textures/2k_earth_daymap.jpg", true)
+        val earthSpec = Texture2D("project/assets/textures/2k_earth_daymap.jpg", true)
+
+        val earthMaterial = Material(earthDiff, earthEmit, earthSpec, 10.0f, Vector2f(1.0f))
+
+        earthEmit.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
+        earthDiff.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
+        earthSpec.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
+
+        earthMesh = Mesh(objMeshEarth.vertexData, objMeshEarth.indexData, objVertexAttributes, earthMaterial)
+
+        earthRend.meshList.add(earthMesh)
+        earthRend.scaleLocal(Vector3f(2.0f))
+        earthRend.translateGlobal(Vector3f(-14.0f, -5.0f, 6.0f))
+        //earthRend.rotateLocal(0.0f, 0.0f, 2.0f)
     }
 
 
     fun render(dt: Float, t: Float) {
 
         glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
-        // ------------Skybox rendern----------------------------
+        // -----------------------Skybox rendern----------------------------
         glDepthFunc(GL_LEQUAL)
         skyboxShader.use()
 
@@ -261,14 +334,11 @@ class Scene(private val window: GameWindow) {
         glBindVertexArray(0);
         glDepthFunc(GL_LESS);
 
-        // andere Sachen rendern
+        //---------------------andere Sachen rendern-----------------------
         staticShader.use()
         tCamera.bind(staticShader)
         //staticShader.setUniform("farbe", Vector3f(abs(sin(t)), abs(sin(t / 2)), abs(sin(t / 3))))
-
         staticShader.setUniform("farbe", Vector3f(1.0f))
-
-
         cycleRend.render(staticShader)
         light.bind(staticShader, "byklePoint")
         spotlight.bind(staticShader, "bykleSpot", tCamera.getCalculateViewMatrix())
@@ -276,7 +346,14 @@ class Scene(private val window: GameWindow) {
         groundRend.render(staticShader)
 
 
-        //------------------collectables rendern----------------
+        //-----------------Background Objekte rendern---------------------
+        staticShader.setUniform("farbe", Vector3f(0.5f))
+        saturnRend.render(staticShader)
+        neptuneRend.render(staticShader)
+        earthRend.render(staticShader)
+
+
+        //------------------collectables rendern-------------------------
 
 
         for (i in 0 until collectableAmount) {
@@ -321,7 +398,7 @@ class Scene(private val window: GameWindow) {
                     println(score)
                 }
             }
-            star.rotate(dt/2)
+            star.rotate(dt)
         }
     }
 
