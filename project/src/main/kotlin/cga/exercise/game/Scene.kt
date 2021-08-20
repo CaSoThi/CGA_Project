@@ -305,22 +305,36 @@ class Scene(private val window: GameWindow) {
             cycleRend.rotateAroundPoint(0.0f, 0.0f, Math.toRadians(0.25f), groundRend.getWorldPosition())
         }
         if (window.getKeyState(GLFW_KEY_A)) {
-            cycleRend.rotateAroundPoint(0.0f, Math.toRadians(0.25f), 0.0f, groundRend.getWorldPosition())
+            cycleRend.rotateAroundPoint(0.0f, Math.toRadians(-0.25f), 0.0f, groundRend.getWorldPosition())
         }
         if (window.getKeyState(GLFW_KEY_D)) {
-            cycleRend.rotateAroundPoint(0.0f, Math.toRadians(-0.25f), 0.0f, groundRend.getWorldPosition())
+            cycleRend.rotateAroundPoint(0.0f, Math.toRadians(0.25f), 0.0f, groundRend.getWorldPosition())
         }
         if (window.getKeyState(GLFW_KEY_S)) {
             cycleRend.rotateAroundPoint(0.0f, 0.0f, Math.toRadians(-0.25f), groundRend.getWorldPosition())
         }
         if(window.getKeyState(GLFW_KEY_SPACE)) {
-            cycleRend.translateLocal(Vector3f(0.0f, 0.0f, 0.0f))
-           // cycleRend.translateLocal(Vector3f(0.0f, 5.0f, 0.0f))
+            val acc = -9.8;
+            var vel = acc*dt;
+            val pos = vel*dt;
+            cycleRend.translateLocal(Vector3f(0.0f, 0.0f, pos.toFloat()))
+            //for(i in 0..10) {
+             //   cycleRend.translateLocal(Vector3f(0.0f, 0.0f, -i.toFloat()))
+            //}
         }
 
         // Animate stars
         for (star in collectables) {
             star.rotate(dt/2)
+        }
+    }
+
+    fun gravityJump() {
+        for(i in 0..10) {
+            cycleRend.translateLocal(Vector3f(0.0f, 0.0f, i.toFloat()))
+        }
+        for(i in 0..10) {
+            cycleRend.translateLocal(Vector3f(0.0f, 0.0f, -i.toFloat()))
         }
     }
 
@@ -334,7 +348,7 @@ class Scene(private val window: GameWindow) {
         oldMousePosY = ypos
 
         if (einbool) {
-            tCamera.rotateAroundPoint(0.0f, Math.toRadians(deltaX.toFloat() * 0.05f), 0.0f, Vector3f(0.0f))
+            tCamera.rotateAroundPoint(Math.toRadians(deltaX.toFloat() * 0.05f), 0.0f, 0.0f, Vector3f(0.0f))
         }
         einbool = true
 
