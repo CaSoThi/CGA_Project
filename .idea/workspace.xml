@@ -4,7 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="601d481d-759f-41fe-a1ee-880d0f01fc80" name="Changes" comment="" />
+    <list default="true" id="601d481d-759f-41fe-a1ee-880d0f01fc80" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/project/assets/models/character.mtl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/project/assets/models/character.obj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/src/main/kotlin/cga/exercise/game/Scene.kt" beforeDir="false" afterPath="$PROJECT_DIR$/project/src/main/kotlin/cga/exercise/game/Scene.kt" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -46,9 +51,12 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../cgabeispiel/CGAProject" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/project/assets/models" />
   </component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\CatiSchmati\dev\CGA_Project\project\assets\models" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="H:\Uni\CGA_Project\project\assets\models" />
       <recent name="C:\Users\CatiSchmati\dev\CGA_Project\project\assets\models" />

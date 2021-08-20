@@ -36,9 +36,9 @@ class Scene(private val window: GameWindow) {
 
     // anstatt des cycles den Character einfügen?
     private var cycleRend = ModelLoader.loadModel(
-        "project/assets/Light Cycle/Light Cycle/HQ_Movie cycle.obj",
+        "project/assets/models/character.obj",
+        Math.toRadians(180.0f),
         Math.toRadians(90.0f),
-        Math.toRadians(0.0f),
         Math.toRadians(90.0f)
     ) ?: throw IllegalArgumentException("Could not load the model")
 
@@ -164,11 +164,11 @@ class Scene(private val window: GameWindow) {
 
         groundRend.meshList.add(groundMesh)
         groundRend.scaleLocal(Vector3f(5.0f))
-        cycleRend.scaleLocal(Vector3f(0.1f))
+        cycleRend.scaleLocal(Vector3f(0.2f))
         //cycleRend.rotateLocal(Math.toRadians(0.0f), Math.toRadians(90.0f), Math.toRadians(0.0f))
         //     cycleRend.parent = groundRend
         cycleRend.setPosition(
-            groundRend.getWorldPosition().x + 5,
+            groundRend.getWorldPosition().x + 5.1f,
             groundRend.getWorldPosition().y,
             groundRend.getWorldPosition().z
         )
@@ -176,7 +176,7 @@ class Scene(private val window: GameWindow) {
         tCamera.parent = cycleRend
 
         tCamera.rotateLocal(Math.toRadians(90.0f), Math.toRadians(45.0f), Math.toRadians(-90.0f))
-        tCamera.translateLocal(Vector3f(0.0f, 0.5f, 4.0f))
+        tCamera.translateLocal(Vector3f(0.0f, 0.5f, 1.0f))
 
 
 
