@@ -8,21 +8,24 @@ import org.joml.Vector3f
 import kotlin.math.pow
 import kotlin.math.sqrt
 
-class Star(light : PointLight, collectableObject: Renderable) {
+class Star(light : PointLight, collectableObject: Renderable, material: Material) {
     private var collectableObject : Renderable
     private var pointLight: PointLight
     private var collected : Boolean
+    private var material : Material
 
     init {
         this.collectableObject = collectableObject
         this.pointLight = light
         this.collected = false
+        this.material = material
     }
 
     fun render(shader : ShaderProgram, name : String) {
         if (!collected) {
             collectableObject.render(shader)
             pointLight.bind(shader, name)
+            shader.setUniform("farbe", Vector3f(1.0f))
         }
     }
 

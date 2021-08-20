@@ -97,7 +97,7 @@ class Scene(private val window: GameWindow) {
 
     // Collectable list
     private var collectables : MutableList<Star>
-    private val collectableAmount : Int = 10
+    private val collectableAmount : Int = 20
     private var score : Int = 0
 
 
@@ -223,13 +223,13 @@ class Scene(private val window: GameWindow) {
             starRend.scaleLocal(Vector3f(0.1f))
             //starRend.rotateLocal(0.0f, 2.8f, 0.0f)
 
-            var starLight = PointLight(starRend.getWorldPosition(), Vector3f(1f, 0f, 0f)) // Light works theoretically but is in object?
+            var starLight = PointLight(starRend.getWorldPosition(), Vector3f(1f)) // Light works theoretically but is in object?
 
             starLight.parent = starRend
 
-            starLight.translateLocal(Vector3f(1.0f, -15.0f, 1.0f))
+            starLight.translateLocal(Vector3f(1.0f, -1.0f, 1.0f))
 
-            var star = Star(starLight, starRend)
+            var star = Star(starLight, starRend, starMaterial)
 
             star.setPosition(groundRend.getWorldPosition().x + 5.1f,
                     groundRend.getWorldPosition().y ,
