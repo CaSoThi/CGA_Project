@@ -23,6 +23,7 @@ import kotlin.random.Random;
 class Scene(private val window: GameWindow) {
     private val staticShader: ShaderProgram
     private val skyboxShader: ShaderProgram
+    private val phongShader : ShaderProgram
 
 
     // anstatt dem "flachen" Ground gewölbtes Ground Object verwednen?
@@ -116,6 +117,7 @@ class Scene(private val window: GameWindow) {
     init {
         staticShader = ShaderProgram("project/assets/shaders/tron_vert.glsl", "project/assets/shaders/tron_frag.glsl")
         skyboxShader = ShaderProgram("project/assets/shaders/skyBoxVert.glsl", "project/assets/shaders/skyBoxFrag.glsl")
+        phongShader = ShaderProgram("project/assets/shaders/phong_vert.glsl", "project/assets/shaders/phong_frag.glsl")
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
         glDisable(GL_CULL_FACE); GLError.checkThrow()
@@ -251,7 +253,7 @@ class Scene(private val window: GameWindow) {
         }
 
         //-----------------------Background Objects--------------------------------------------------
-        val resSaturn: OBJLoader.OBJResult = OBJLoader.loadOBJ("project/assets/models/saturn2.obj")
+        val resSaturn: OBJLoader.OBJResult = OBJLoader.loadOBJ("project/assets/models/saturn3.obj")
         val objMeshSaturn: OBJLoader.OBJMesh = resSaturn.objects[0].meshes[0]
 
         val saturnEmit = Texture2D("project/assets/textures/2k_saturn.jpg", true)
@@ -330,6 +332,38 @@ class Scene(private val window: GameWindow) {
         ufoRend.scaleLocal(Vector3f(0.5f))
         ufoRend.translateGlobal(Vector3f(14.0f, -6.0f, -12.0f))
         ufoRend.rotateLocal(0.0f, 0.0f, 3.0f)
+
+
+
+        // shadow mapping
+        /*
+        val depthMapFrameBuffer = glGenFramebuffers()
+        val shadowWidth = 1024
+        val shadowHeight = 1024
+        val depthMap : Int = glGenTextures()
+        glBindTexture(GL_TEXTURE_2D, depthMap)
+        GL11.glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, shadowWidth, shadowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
+
+        glViewport(0, 0, shadowWidth, shadowHeight)
+        glBindFramebuffer(GL_FRAMEBUFFER, depthMapFrameBuffer)
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0)
+        glDrawBuffer(GL_NONE)
+        glReadBuffer(GL_NONE)
+        glBindFramebuffer(GL_FRAMEBUFFER, 0)
+        glClear(GL_DEPTH_BUFFER_BIT)
+
+
+        val near_plane = 1.0f.toDouble()
+        val far_plane = 7.5f.toDouble()
+        val lightProjection = glOrtho(-10.0f.toDouble(), 10.0f.toDouble(), -10.0f.toDouble(), 10.0f.toDouble(), near_plane, far_plane)
+        val lightView = Matrix4f().lookAt(Vector3f(-2.0f, 4.0f, -1.0f),Vector3f( 0.0f, 0.0f,  0.0f), Vector3f( 0.0f, 1.0f,  0.0f))
+        //val lightSpaceMatrix : Matrix4f = lightView.mul(lightProjection)
+        
+         */
     }
 
 
@@ -351,8 +385,24 @@ class Scene(private val window: GameWindow) {
         //skyboxShader.setUniform("skybox", cubeMapTexture)
         glBindVertexArray(0);
         glDepthFunc(GL_LESS);
+/*
+        //---------------------Phong Shader--------------------------------
+        phongShader.use()
+        tCamera.bind(phongShader)
+        phongShader.setUniform("objectCol", 1.0f)
+        phongShader.setUniform("lightCol", Vector3f(1.0f, 0.5f, 0.3f))
+        phongShader.setUniform("lightPos", Vector3f(0.0f, -10.0f, 0.0f))
+        phongShader.setUniform("projection", tCamera.getCalculateProjectionMatrix(), false)
+        phongShader.setUniform("view", tCamera.getCalculateViewMatrix(), false)
+        //phongShader.setUniform("model", tCamera.getWorldModelMatrix(), false)
+        cycleRend.render(phongShader)
+        groundRend.render(phongShader)
+
+*/
+
 
         //---------------------andere Sachen rendern-----------------------
+
         staticShader.use()
         tCamera.bind(staticShader)
         //staticShader.setUniform("farbe", Vector3f(abs(sin(t)), abs(sin(t / 2)), abs(sin(t / 3))))
@@ -363,8 +413,11 @@ class Scene(private val window: GameWindow) {
         staticShader.setUniform("farbe", Vector3f(0.0f, 0.0f, 0.0f))
         groundRend.render(staticShader)
 
+         
+
 
         //-----------------Background Objekte rendern---------------------
+        staticShader.use()
         staticShader.setUniform("farbe", Vector3f(0.5f))
         saturnRend.render(staticShader)
         neptuneRend.render(staticShader)
@@ -373,8 +426,6 @@ class Scene(private val window: GameWindow) {
 
 
         //------------------collectables rendern-------------------------
-
-
         for (i in 0 until collectableAmount) {
             collectables[i].render(staticShader, "byklePoint")
         }
@@ -398,6 +449,7 @@ class Scene(private val window: GameWindow) {
         if (window.getKeyState(GLFW_KEY_S)) {
             cycleRend.rotateAroundPoint(0.0f, 0.0f, Math.toRadians(-0.25f), groundRend.getWorldPosition())
         }
+
         if(window.getKeyState(GLFW_KEY_SPACE)) {
             val acc = -9.8;
             var vel = acc*dt;
@@ -407,6 +459,8 @@ class Scene(private val window: GameWindow) {
              //   cycleRend.translateLocal(Vector3f(0.0f, 0.0f, -i.toFloat()))
             //}
         }
+
+
 
         // Animate stars & check collision
         for (star in collectables) {
