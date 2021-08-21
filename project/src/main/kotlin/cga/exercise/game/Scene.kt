@@ -50,6 +50,13 @@ class Scene(private val window: GameWindow) {
 
     //private var spotlight2 = Spotlight(Vector3f(), Vector3f())
 
+    private var canJumpUp = false;
+    private var jumpSpeed = -0.8f;
+
+    //jumping speed
+    private var yspeed = 0f
+    var ygrav = 0.005f
+    val terminalvelocity = 0.3f
 
     private var oldMousePosX: Double = -1.0
     private var oldMousePosY: Double = -1.0
@@ -408,6 +415,72 @@ class Scene(private val window: GameWindow) {
             //}
         }
 
+        println(yspeed)
+        if(checkCollisionWithPlanet()) {
+            yspeed = 0.0f;
+            if(window.getKeyState(GLFW_KEY_SPACE) && canJumpUp) {
+                println("PRESSED")
+                canJumpUp = false;
+                yspeed =jumpSpeed;
+            }
+        } else {
+            // ermöglicht neues springen und checkt ob max erreicht wurde
+
+
+
+        }
+
+        if(!canJumpUp) {
+            cycleRend.setPosition(cycleRend.x(), cycleRend.y() + yspeed, cycleRend.z())
+            yspeed = Math.max(-terminalvelocity,yspeed - ygrav)
+
+        }
+
+        if(!window.getKeyState(GLFW_KEY_SPACE)) {
+            canJumpUp = true;
+            if(yspeed > 10) {
+                yspeed = 10f
+
+            }
+        }
+
+
+
+        /*if(!canJumpUp) {
+
+            yspeed += jumpSpeed;
+            if(yspeed > 0.08) {
+                yspeed = 0.08f
+            }
+        }*/
+
+        /* if(window.getKeyState(GLFW_KEY_SPACE) && canJumpUp) {
+             //println(cycleRend.getWorldPosition().z == groundRend.getWorldPosition().z+5.1f)
+             yspeed = jumpSpeed;
+             canJumpUp = false;
+
+         }
+
+
+         yspeed += jumpSpeed
+
+
+
+
+
+     if(!window.getKeyState(GLFW_KEY_SPACE)){
+         canJumpUp = true
+         if(yspeed > 8) {
+             yspeed = 8f
+         }
+     }*/
+
+        // Animate stars
+        for (star in collectables) {
+            star.rotate(dt/2)
+        }
+
+
         // Animate stars & check collision
         for (star in collectables) {
             // Collision Detection
@@ -425,6 +498,19 @@ class Scene(private val window: GameWindow) {
         earthRend.rotateAroundPoint(dt/20, 0.0f, 0.0f,  groundRend.getWorldPosition())
         neptuneRend.rotateAroundPoint(dt/20, 0.0f, 0.0f,  groundRend.getWorldPosition())
         saturnRend.rotateAroundPoint(dt/20, 0.0f, 0.0f,  groundRend.getWorldPosition())
+    }
+
+    fun pointDistance3d(x1: Float, y1: Float, z1: Float, x2: Float, y2: Float, z2: Float):Float = Math.sqrt((x2-x1).pow(2) + (y2-y1).pow(2) + (z2-z1).pow(2))
+
+    fun checkCollisionWithPlanet(): Boolean {
+        val collision = 5.1f;
+        val currentDifference = pointDistance3d(groundRend.x(), groundRend.y(), groundRend.z(), cycleRend.x(), cycleRend.y(), cycleRend.z())
+        //println(currentDifference)
+        // println(collision)
+        if(currentDifference <= collision) {
+            return true;
+        }
+        return false;
     }
 
     fun gravityJump() {
