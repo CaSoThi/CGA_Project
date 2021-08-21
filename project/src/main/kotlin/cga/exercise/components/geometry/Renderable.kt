@@ -4,6 +4,11 @@ import cga.exercise.components.shader.ShaderProgram
 
 open class Renderable (val meshList : MutableList<Mesh> = mutableListOf()) : Transformable(), IRenderable{
 
+    //Get Position information
+    fun x() = this.getWorldPosition().x
+    fun y() = this.getWorldPosition().y
+    fun z() = this.getWorldPosition().z
+
     override fun render(shaderProgram: ShaderProgram) {
 
         shaderProgram.setUniform("model_matrix", getWorldModelMatrix(), false)
