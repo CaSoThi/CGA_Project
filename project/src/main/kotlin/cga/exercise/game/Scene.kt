@@ -32,6 +32,8 @@ class Scene(private val window: GameWindow) {
 
     private var groundMesh: Mesh
 
+    println("Test")
+
 
     // anstatt des cycles den Character einfügen?
     private var cycleRend = ModelLoader.loadModel(
