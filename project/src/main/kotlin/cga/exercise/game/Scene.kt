@@ -17,6 +17,7 @@ import org.lwjgl.opengl.GL11
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.GL30.*
 import java.util.*
+import kotlin.math.pow
 import kotlin.random.Random;
 
 
