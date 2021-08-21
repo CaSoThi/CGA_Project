@@ -12,14 +12,11 @@ import cga.framework.GLError
 import cga.framework.GameWindow
 import cga.framework.ModelLoader
 import cga.framework.OBJLoader
-import org.joml.Vector3f
+import org.joml.*
 import org.lwjgl.opengl.GL11
-import org.joml.Math
-import org.joml.Vector2f
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.GL30.*
 import java.util.*
-import kotlin.math.pow
 import kotlin.random.Random;
 
 
@@ -33,7 +30,6 @@ class Scene(private val window: GameWindow) {
     private val objMeshGround: OBJLoader.OBJMesh = resGround.objects[0].meshes[0]
 
     private var groundMesh: Mesh
-    val accel_const = 1.4f //Acceleration
 
 
     // anstatt des cycles den Character einfügen?
@@ -59,14 +55,6 @@ class Scene(private val window: GameWindow) {
     private var oldMousePosY: Double = -1.0
     private var einbool: Boolean = false
 
-    // enable jumping
-    private var canJumpUp = false;
-    private var jumpSpeed = -0.8f;
-
-    //jumping speed
-    private var yspeed = 0f
-    var ygrav = 0.005f
-    val terminalvelocity = 0.3f
 
     // Vertices und Indices der CubeMap festlegen
     var size: Float = 500.0f
@@ -110,12 +98,24 @@ class Scene(private val window: GameWindow) {
     private val collectableAmount : Int = 20
     private var score : Int = 0
 
+    //Background Objects
+    private var saturnMesh: Mesh
+    private var saturnRend = Renderable()
+
+    private var neptuneMesh: Mesh
+    private var neptuneRend = Renderable()
+
+    private var earthMesh: Mesh
+    private var earthRend = Renderable()
+
+    private var ufoMesh: Mesh
+    private var ufoRend = Renderable()
+
 
     //scene setup
     init {
         staticShader = ShaderProgram("project/assets/shaders/tron_vert.glsl", "project/assets/shaders/tron_frag.glsl")
         skyboxShader = ShaderProgram("project/assets/shaders/skyBoxVert.glsl", "project/assets/shaders/skyBoxFrag.glsl")
-
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
         glDisable(GL_CULL_FACE); GLError.checkThrow()
@@ -143,8 +143,6 @@ class Scene(private val window: GameWindow) {
         cubeMapTexture = cubeMap.loadCubeMap(facesCubeMap)
 
         // ---------------------------------------------------------------------------------------
-
-
         //Erzeugen der Vertex Attribute
         val stride = 8 * 4
         val attrPos = VertexAttribute(3, GL_FLOAT, stride, 0)
@@ -152,7 +150,6 @@ class Scene(private val window: GameWindow) {
         val attrNorm = VertexAttribute(3, GL_FLOAT, stride, 5 * 4)
 
         val objVertexAttributes = arrayOf(attrPos, attrTC, attrNorm)
-
 
         //-------------------------------------Material--------------------------------------------
         val emitTex = Texture2D("project/assets/textures/4k_venus_atmosphere.jpg", true)
@@ -239,7 +236,7 @@ class Scene(private val window: GameWindow) {
 
             starLight.translateLocal(Vector3f(1.0f, -1.0f, 1.0f))
 
-            var star = Star(starLight, starRend, starMaterial)
+            var star = Star(starLight, starRend, starMaterial, i)
 
             star.setPosition(groundRend.getWorldPosition().x + 5.1f,
                     groundRend.getWorldPosition().y ,
@@ -252,13 +249,94 @@ class Scene(private val window: GameWindow) {
 
             collectables.add(star)
         }
+
+        //-----------------------Background Objects--------------------------------------------------
+        val resSaturn: OBJLoader.OBJResult = OBJLoader.loadOBJ("project/assets/models/saturn2.obj")
+        val objMeshSaturn: OBJLoader.OBJMesh = resSaturn.objects[0].meshes[0]
+
+        val saturnEmit = Texture2D("project/assets/textures/2k_saturn.jpg", true)
+        val saturnDiff = Texture2D("project/assets/textures/2k_saturn.jpg", true)
+        val saturnSpec = Texture2D("project/assets/textures/2k_saturn.jpg", true)
+
+        val saturnMaterial = Material(saturnDiff, saturnEmit, saturnSpec, 10.0f, Vector2f(1.0f))
+
+        saturnEmit.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
+        saturnDiff.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
+        saturnSpec.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
+
+        saturnMesh = Mesh(objMeshSaturn.vertexData, objMeshSaturn.indexData, objVertexAttributes, saturnMaterial)
+
+        saturnRend.meshList.add(saturnMesh)
+        saturnRend.scaleLocal(Vector3f(2.0f))
+        saturnRend.translateGlobal(Vector3f(0.0f, 15.0f, 10.0f))
+        saturnRend.rotateLocal(0.0f, 0.0f, 2.0f)
+
+        val resNeptune: OBJLoader.OBJResult = OBJLoader.loadOBJ("project/assets/models/planet.obj")
+        val objMeshNeptune: OBJLoader.OBJMesh = resNeptune.objects[0].meshes[0]
+
+        val neptuneEmit = Texture2D("project/assets/textures/2k_neptune.jpg", true)
+        val neptuneDiff = Texture2D("project/assets/textures/2k_neptune.jpg", true)
+        val neptuneSpec = Texture2D("project/assets/textures/2k_neptune.jpg", true)
+
+        val neptuneMaterial = Material(neptuneDiff, neptuneEmit, neptuneSpec, 10.0f, Vector2f(1.0f))
+
+        neptuneEmit.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
+        neptuneDiff.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
+        neptuneSpec.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
+
+        neptuneMesh = Mesh(objMeshNeptune.vertexData, objMeshNeptune.indexData, objVertexAttributes, neptuneMaterial)
+
+        neptuneRend.meshList.add(neptuneMesh)
+        neptuneRend.scaleLocal(Vector3f(2.0f))
+        neptuneRend.translateGlobal(Vector3f(0.0f, -10.0f, -8.0f))
+        neptuneRend.rotateLocal(0.0f, 0.0f, 2.0f)
+
+        val resEarth: OBJLoader.OBJResult = OBJLoader.loadOBJ("project/assets/models/planet.obj")
+        val objMeshEarth: OBJLoader.OBJMesh = resEarth.objects[0].meshes[0]
+
+        val earthEmit = Texture2D("project/assets/textures/2k_earth_daymap.jpg", true)
+        val earthDiff = Texture2D("project/assets/textures/2k_earth_daymap.jpg", true)
+        val earthSpec = Texture2D("project/assets/textures/2k_earth_daymap.jpg", true)
+
+        val earthMaterial = Material(earthDiff, earthEmit, earthSpec, 10.0f, Vector2f(1.0f))
+
+        earthEmit.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
+        earthDiff.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
+        earthSpec.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
+
+        earthMesh = Mesh(objMeshEarth.vertexData, objMeshEarth.indexData, objVertexAttributes, earthMaterial)
+
+        earthRend.meshList.add(earthMesh)
+        earthRend.scaleLocal(Vector3f(2.0f))
+        earthRend.translateGlobal(Vector3f(-14.0f, -5.0f, 6.0f))
+        //earthRend.rotateLocal(0.0f, 0.0f, 2.0f)
+
+        val resUfo: OBJLoader.OBJResult = OBJLoader.loadOBJ("project/assets/models/ufo.obj")
+        val objMeshUfo: OBJLoader.OBJMesh = resUfo.objects[0].meshes[0]
+
+        val ufoEmit = Texture2D("project/assets/textures/ufo.jpg", true)
+        val ufoDiff = Texture2D("project/assets/textures/ufo.jpg", true)
+        val ufoSpec = Texture2D("project/assets/textures/ufo.jpg", true)
+
+        val ufoMaterial = Material(ufoDiff, ufoEmit, ufoSpec, 10.0f, Vector2f(1.0f))
+
+        ufoEmit.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
+        ufoDiff.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
+        ufoSpec.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
+
+        ufoMesh = Mesh(objMeshUfo.vertexData, objMeshUfo.indexData, objVertexAttributes, ufoMaterial)
+
+        ufoRend.meshList.add(ufoMesh)
+        ufoRend.scaleLocal(Vector3f(0.5f))
+        ufoRend.translateGlobal(Vector3f(14.0f, -6.0f, -12.0f))
+        ufoRend.rotateLocal(0.0f, 0.0f, 3.0f)
     }
 
 
     fun render(dt: Float, t: Float) {
 
         glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
-        // ------------Skybox rendern----------------------------
+        // -----------------------Skybox rendern----------------------------
         glDepthFunc(GL_LEQUAL)
         skyboxShader.use()
 
@@ -274,14 +352,11 @@ class Scene(private val window: GameWindow) {
         glBindVertexArray(0);
         glDepthFunc(GL_LESS);
 
-        // andere Sachen rendern
+        //---------------------andere Sachen rendern-----------------------
         staticShader.use()
         tCamera.bind(staticShader)
         //staticShader.setUniform("farbe", Vector3f(abs(sin(t)), abs(sin(t / 2)), abs(sin(t / 3))))
-
         staticShader.setUniform("farbe", Vector3f(1.0f))
-
-
         cycleRend.render(staticShader)
         light.bind(staticShader, "byklePoint")
         spotlight.bind(staticShader, "bykleSpot", tCamera.getCalculateViewMatrix())
@@ -289,19 +364,19 @@ class Scene(private val window: GameWindow) {
         groundRend.render(staticShader)
 
 
-        //------------------collectables rendern----------------
+        //-----------------Background Objekte rendern---------------------
+        staticShader.setUniform("farbe", Vector3f(0.5f))
+        saturnRend.render(staticShader)
+        neptuneRend.render(staticShader)
+        earthRend.render(staticShader)
+        ufoRend.render(staticShader)
 
-        for (star in collectables) {
 
-            // Collision Detection
-            if (star.distance(cycleRend) < 0.2f){
-                if (star.collect()) {
-                    score++
-                    println(score)
-                }
-            }
-            star.render(staticShader, "byklePoint")
+        //------------------collectables rendern-------------------------
 
+
+        for (i in 0 until collectableAmount) {
+            collectables[i].render(staticShader, "byklePoint")
         }
 
     }
@@ -309,7 +384,6 @@ class Scene(private val window: GameWindow) {
 
     fun update(dt: Float, t: Float) {
         //Farbe des Motorads wird verändert in Abhängigkeit der Zeit mit sinuswerten
-        val accel = accel_const * 4 * dt
 
         //light.lightCol = Vector3f(abs(sin(t)), abs(sin(t / 2)), abs(sin(t / 3)))
         if (window.getKeyState(GLFW_KEY_W)) {
@@ -317,7 +391,6 @@ class Scene(private val window: GameWindow) {
         }
         if (window.getKeyState(GLFW_KEY_A)) {
             cycleRend.rotateAroundPoint(0.0f, Math.toRadians(-0.25f), 0.0f, groundRend.getWorldPosition())
-
         }
         if (window.getKeyState(GLFW_KEY_D)) {
             cycleRend.rotateAroundPoint(0.0f, Math.toRadians(0.25f), 0.0f, groundRend.getWorldPosition())
@@ -325,144 +398,43 @@ class Scene(private val window: GameWindow) {
         if (window.getKeyState(GLFW_KEY_S)) {
             cycleRend.rotateAroundPoint(0.0f, 0.0f, Math.toRadians(-0.25f), groundRend.getWorldPosition())
         }
-
-        // check collision with planet
-
-       // println(pointDistance3d(groundRend.x(), groundRend.y(), groundRend.z(), cycleRend.x(), cycleRend.y(), cycleRend.z())  )
-
-        println(yspeed)
-        if(checkCollisionWithPlanet()) {
-            yspeed = 0.0f;
-            if(window.getKeyState(GLFW_KEY_SPACE) && canJumpUp) {
-                println("PRESSED")
-                canJumpUp = false;
-                yspeed =jumpSpeed;
-            }
-        } else {
-            // ermöglicht neues springen und checkt ob max erreicht wurde
-
-
-
+        if(window.getKeyState(GLFW_KEY_SPACE)) {
+            val acc = -9.8;
+            var vel = acc*dt;
+            val pos = vel*dt;
+            cycleRend.translateLocal(Vector3f(0.0f, 0.0f, pos.toFloat()))
+            //for(i in 0..10) {
+             //   cycleRend.translateLocal(Vector3f(0.0f, 0.0f, -i.toFloat()))
+            //}
         }
 
-        if(!canJumpUp) {
-            cycleRend.setPosition(cycleRend.x(), cycleRend.y() + yspeed, cycleRend.z())
-            yspeed = Math.max(-terminalvelocity,yspeed - ygrav)
-
-        }
-
-        if(!window.getKeyState(GLFW_KEY_SPACE)) {
-            canJumpUp = true;
-            if(yspeed > 10) {
-                yspeed = 10f
-
-            }
-        }
-
-
-
-        /*if(!canJumpUp) {
-
-            yspeed += jumpSpeed;
-            if(yspeed > 0.08) {
-                yspeed = 0.08f
-            }
-        }*/
-
-           /* if(window.getKeyState(GLFW_KEY_SPACE) && canJumpUp) {
-                //println(cycleRend.getWorldPosition().z == groundRend.getWorldPosition().z+5.1f)
-                yspeed = jumpSpeed;
-                canJumpUp = false;
-
-            }
-
-
-            yspeed += jumpSpeed
-
-
-
-
-
-        if(!window.getKeyState(GLFW_KEY_SPACE)){
-            canJumpUp = true
-            if(yspeed > 8) {
-                yspeed = 8f
-            }
-        }*/
-
-        // Animate stars
+        // Animate stars & check collision
         for (star in collectables) {
-            star.rotate(dt/2)
+            // Collision Detection
+            if (star.distance(cycleRend) < 0.2f){
+                if (star.collect()) {
+                    score++
+                    println(score)
+                }
+            }
+            star.rotate(dt)
         }
+
+        //Background Objects
+        ufoRend.rotateAroundPoint(dt/20, 0.0f, 0.0f,  groundRend.getWorldPosition())
+        earthRend.rotateAroundPoint(dt/20, 0.0f, 0.0f,  groundRend.getWorldPosition())
+        neptuneRend.rotateAroundPoint(dt/20, 0.0f, 0.0f,  groundRend.getWorldPosition())
+        saturnRend.rotateAroundPoint(dt/20, 0.0f, 0.0f,  groundRend.getWorldPosition())
     }
 
-    fun pointDistance3d(x1: Float, y1: Float, z1: Float, x2: Float, y2: Float, z2: Float):Float = Math.sqrt((x2-x1).pow(2) + (y2-y1).pow(2) + (z2-z1).pow(2))
-
-    fun checkCollisionWithPlanet(): Boolean {
-        val collision = 5.1f;
-        val currentDifference = pointDistance3d(groundRend.x(), groundRend.y(), groundRend.z(), cycleRend.x(), cycleRend.y(), cycleRend.z())
-        //println(currentDifference)
-       // println(collision)
-        if(currentDifference <= collision) {
-            return true;
+    fun gravityJump() {
+        for(i in 0..10) {
+            cycleRend.translateLocal(Vector3f(0.0f, 0.0f, i.toFloat()))
         }
-        return false;
+        for(i in 0..10) {
+            cycleRend.translateLocal(Vector3f(0.0f, 0.0f, -i.toFloat()))
+        }
     }
-
-    /*fun gravityJump(dt: Float) {
-        //Euler's method for numerical integration
-        //var JUMP_POWER = 30.0f;
-        val acc = 9.8;
-        var vel = acc*dt;
-        val pos = vel*dt;
-        println(pos)
-        var i =0;
-        val curPos = cycleRend.getWorldPosition();
-        if(jumpUp) {
-            //cycleRend.translateLocal(Vector3f(cycleRend.getWorldPosition().x*dt*100.0f, 0.0f,0.0f))
-            //cycleRend.translateLocal(Vector3f(0.0f, cycleRend.getWorldPosition().y*dt*100.0f,0.0f))
-            cycleRend.setPosition(cycleRend.x(), cycleRend.y() + vel.toFloat(), cycleRend.z())
-            jumpUp = false
-            jumpDown = true
-            println("UP")
-        }
-        Timer().schedule(object : TimerTask() {
-            override fun run() {
-                println(curPos)
-                cycleRend.setPosition(curPos.x, curPos.y, curPos.z)
-
-                jumpUp = true
-                jumpDown = false
-            }
-        }, 500)
-
-
-
-       /* if(jumpDown) {
-            cycleRend.translateLocal(Vector3f(-cycleRend.getWorldPosition().x*dt, 0.0f,0.0f))
-            cycleRend.translateLocal(Vector3f(0.0f, -cycleRend.getWorldPosition().y*dt,0.0f))
-            jumpUp = true
-            jumpDown = false
-            println("DOWN")
-        }*/
-
-        /*while(startLoop) {
-
-            cycleRend.translateLocal(Vector3f(cycleRend.getWorldPosition().x*dt, 0.0f,0.0f))
-            cycleRend.translateLocal(Vector3f(0.0f, cycleRend.getWorldPosition().y*dt,0.0f))
-            i++;
-            if(i == 100) {
-                startLoop = false
-            }
-        }*/
-
-
-        if(cycleRend.getWorldPosition().y > 10 ) {
-            println("TST")
-        }
-
-     //  cycleRend.translateLocal(Vector3f(0.0f, 0.0f, pos.toFloat()))
-    }*/
 
     fun onKey(key: Int, scancode: Int, action: Int, mode: Int) {}
 

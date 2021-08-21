@@ -1,31 +1,36 @@
 package cga.exercise.components.geometry
 
+import cga.exercise.components.camera.TronCamera
 import cga.exercise.components.light.PointLight
 import cga.exercise.components.light.SpotLight
 import cga.exercise.components.shader.ShaderProgram
 import org.joml.Math
 import org.joml.Vector3f
+import java.util.*
 import kotlin.math.pow
 import kotlin.math.sqrt
 
-class Star(light : PointLight, collectableObject: Renderable, material: Material) {
+class Star(light : PointLight, collectableObject: Renderable, material: Material, id : Int) {
     private var collectableObject : Renderable
     private var pointLight: PointLight
     private var collected : Boolean
     private var material : Material
+    private var id : Int
 
     init {
         this.collectableObject = collectableObject
         this.pointLight = light
         this.collected = false
         this.material = material
+        this.id = id
     }
 
     fun render(shader : ShaderProgram, name : String) {
         if (!collected) {
-            collectableObject.render(shader)
-            pointLight.bind(shader, name)
+            shader.use()
             shader.setUniform("farbe", Vector3f(1.0f))
+            pointLight.bind(shader, name)
+            collectableObject.render(shader)
         }
     }
 
