@@ -24,26 +24,25 @@ class Scene(private val window: GameWindow) {
     private val staticShader: ShaderProgram
     private val skyboxShader: ShaderProgram
     private val phongShader : ShaderProgram
+    private val toonShader: ShaderProgram
 
 
-    // anstatt dem "flachen" Ground gewölbtes Ground Object verwednen?
     private val resGround: OBJLoader.OBJResult = OBJLoader.loadOBJ("project/assets/models/planet.obj")
     private val objMeshGround: OBJLoader.OBJMesh = resGround.objects[0].meshes[0]
 
     private var groundMesh: Mesh
 
-    println("Test")
 
 
     // anstatt des cycles den Character einfügen?
-    private var cycleRend = ModelLoader.loadModel(
+    private var character = ModelLoader.loadModel(
         "project/assets/models/character.obj",
         Math.toRadians(180.0f),
         Math.toRadians(90.0f),
         Math.toRadians(90.0f)
     ) ?: throw IllegalArgumentException("Could not load the model")
 
-    private var groundRend = Renderable()
+    private var planet = Renderable()
 
     private var tCamera = TronCamera()
 
@@ -120,6 +119,7 @@ class Scene(private val window: GameWindow) {
         staticShader = ShaderProgram("project/assets/shaders/tron_vert.glsl", "project/assets/shaders/tron_frag.glsl")
         skyboxShader = ShaderProgram("project/assets/shaders/skyBoxVert.glsl", "project/assets/shaders/skyBoxFrag.glsl")
         phongShader = ShaderProgram("project/assets/shaders/phong_vert.glsl", "project/assets/shaders/phong_frag.glsl")
+        toonShader = ShaderProgram("project/assets/shaders/toon_vert.glsl", "project/assets/shaders/toon_frag.glsl")
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
         glDisable(GL_CULL_FACE); GLError.checkThrow()
@@ -173,18 +173,18 @@ class Scene(private val window: GameWindow) {
 
         groundMesh = Mesh(objMeshGround.vertexData, objMeshGround.indexData, objVertexAttributes, groundMaterial)
 
-        groundRend.meshList.add(groundMesh)
-        groundRend.scaleLocal(Vector3f(5.0f))
-        cycleRend.scaleLocal(Vector3f(0.2f))
+        planet.meshList.add(groundMesh)
+        planet.scaleLocal(Vector3f(5.0f))
+        character.scaleLocal(Vector3f(0.2f))
         //cycleRend.rotateLocal(Math.toRadians(0.0f), Math.toRadians(90.0f), Math.toRadians(0.0f))
         //     cycleRend.parent = groundRend
-        cycleRend.setPosition(
-            groundRend.getWorldPosition().x + 5.1f,
-            groundRend.getWorldPosition().y,
-            groundRend.getWorldPosition().z
+        character.setPosition(
+            planet.getWorldPosition().x + 5.1f,
+            planet.getWorldPosition().y,
+            planet.getWorldPosition().z
         )
 
-        tCamera.parent = cycleRend
+        tCamera.parent = character
 
         tCamera.rotateLocal(Math.toRadians(90.0f), Math.toRadians(45.0f), Math.toRadians(-90.0f))
         tCamera.translateLocal(Vector3f(0.0f, 0.5f, 1.0f))
@@ -195,13 +195,13 @@ class Scene(private val window: GameWindow) {
         light = PointLight(tCamera.getWorldPosition(), Vector3f(1.0f))
         light.translateLocal(Vector3f(1.0f, -5.0f, 0.0f))
 
-        light.parent = cycleRend
+        light.parent = character
 
 
         // Spotlight mit Neigung in x und z Richtung
         spotlight = SpotLight(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(0.0f))
         spotlight.rotateLocal(Math.toRadians(-90.0f), Math.PI.toFloat(), 0.0f)
-        spotlight.parent = cycleRend
+        spotlight.parent = character
         //spotlight2 = Spotlight(Vector3f(0.0f, 2.0f, -2.0f), Vector3f(1.0f))
         spotlight.rotateLocal(Math.toRadians(-10.0f), Math.PI.toFloat(), 0.0f)
         //spotlight2.parent = cycleRend
@@ -220,36 +220,33 @@ class Scene(private val window: GameWindow) {
 
         val starMaterial = Material(starDiff, starEmit, starSpec, 40.0f, Vector2f(1.0f))
 
-
         collectables = mutableListOf()
         for (i in 1..collectableAmount) {
             val resStar: OBJLoader.OBJResult = OBJLoader.loadOBJ("project/assets/models/Star2.obj")
             val objStar: OBJLoader.OBJMesh = resStar.objects[0].meshes[0]
 
             val starMesh = Mesh(objStar.vertexData, objStar.indexData, objVertexAttributes, starMaterial)
-            var starRend = Renderable()
+            val starRend = Renderable()
 
             starRend.meshList.add(starMesh)
 
             starRend.scaleLocal(Vector3f(0.1f))
             //starRend.rotateLocal(0.0f, 2.8f, 0.0f)
 
-            var starLight = PointLight(starRend.getWorldPosition(), Vector3f(1f)) // Light works theoretically but is in object?
+            val starLight = PointLight(starRend.getWorldPosition(), Vector3f(1f)) // Light works theoretically but is in object?
 
             starLight.parent = starRend
 
             starLight.translateLocal(Vector3f(1.0f, -1.0f, 1.0f))
 
-            var star = Star(starLight, starRend, starMaterial, i)
+            val star = Star(starLight, starRend, starMaterial, i)
 
-            star.setPosition(groundRend.getWorldPosition().x + 5.1f,
-                    groundRend.getWorldPosition().y ,
-                    groundRend.getWorldPosition().z )
+            star.setPosition(planet.getWorldPosition().x + 5.1f, planet.getWorldPosition().y, planet.getWorldPosition().z)
 
             val randomX = Random.nextFloat() * 360f
             val randomY = Random.nextFloat() * 360f
 
-            star.rotateAroundPoint(0.0f, randomX, randomY, groundRend.getWorldPosition())
+            star.rotateAroundPoint(0.0f, randomX, randomY, planet.getWorldPosition())
 
             collectables.add(star)
         }
@@ -401,7 +398,13 @@ class Scene(private val window: GameWindow) {
         groundRend.render(phongShader)
 
 */
+        //---------------------Toon Shader--------------------------------
+        toonShader.use()
+        toonShader.setUniform("transform", Matrix4f(0.0f,0.0f,0.0f,0.0f))
+        toonShader.setUniform("fraction", 1.0f)
 
+        character.render(toonShader)
+        planet.render(toonShader)
 
         //---------------------andere Sachen rendern-----------------------
 
@@ -409,11 +412,13 @@ class Scene(private val window: GameWindow) {
         tCamera.bind(staticShader)
         //staticShader.setUniform("farbe", Vector3f(abs(sin(t)), abs(sin(t / 2)), abs(sin(t / 3))))
         staticShader.setUniform("farbe", Vector3f(1.0f))
-        cycleRend.render(staticShader)
+        //character.render(staticShader)
         light.bind(staticShader, "byklePoint")
         spotlight.bind(staticShader, "bykleSpot", tCamera.getCalculateViewMatrix())
         staticShader.setUniform("farbe", Vector3f(0.0f, 0.0f, 0.0f))
-        groundRend.render(staticShader)
+        //planet.render(staticShader)
+
+
 
          
 
@@ -440,23 +445,30 @@ class Scene(private val window: GameWindow) {
 
         //light.lightCol = Vector3f(abs(sin(t)), abs(sin(t / 2)), abs(sin(t / 3)))
         if (window.getKeyState(GLFW_KEY_W)) {
-            cycleRend.rotateAroundPoint(0.0f, 0.0f, Math.toRadians(0.25f), groundRend.getWorldPosition())
+            character.rotateAroundPoint(0.0f, 0.0f, Math.toRadians(0.1f), planet.getWorldPosition())
+            if (window.getKeyState(GLFW_KEY_A)) {
+                character.rotateAroundPoint(0.0f, Math.toRadians(-0.1f), 0.0f, planet.getWorldPosition())
+            }
+            if (window.getKeyState(GLFW_KEY_D)) {
+                character.rotateAroundPoint(0.0f, Math.toRadians(0.1f), 0.0f, planet.getWorldPosition())
+            }
         }
-        if (window.getKeyState(GLFW_KEY_A)) {
-            cycleRend.rotateAroundPoint(0.0f, Math.toRadians(-0.25f), 0.0f, groundRend.getWorldPosition())
-        }
-        if (window.getKeyState(GLFW_KEY_D)) {
-            cycleRend.rotateAroundPoint(0.0f, Math.toRadians(0.25f), 0.0f, groundRend.getWorldPosition())
-        }
+
         if (window.getKeyState(GLFW_KEY_S)) {
-            cycleRend.rotateAroundPoint(0.0f, 0.0f, Math.toRadians(-0.25f), groundRend.getWorldPosition())
+            character.rotateAroundPoint(0.0f, 0.0f, Math.toRadians(-0.1f), planet.getWorldPosition())
+            if (window.getKeyState(GLFW_KEY_A)) {
+                character.rotateAroundPoint(0.0f, Math.toRadians(-0.1f), 0.0f, planet.getWorldPosition())
+            }
+            if (window.getKeyState(GLFW_KEY_D)) {
+                character.rotateAroundPoint(0.0f, Math.toRadians(0.1f), 0.0f, planet.getWorldPosition())
+            }
         }
 
         if(window.getKeyState(GLFW_KEY_SPACE)) {
             val acc = -9.8;
-            var vel = acc*dt;
+            val vel = acc*dt;
             val pos = vel*dt;
-            cycleRend.translateLocal(Vector3f(0.0f, 0.0f, pos.toFloat()))
+            character.translateLocal(Vector3f(0.0f, 0.0f, pos.toFloat()))
             //for(i in 0..10) {
              //   cycleRend.translateLocal(Vector3f(0.0f, 0.0f, -i.toFloat()))
             //}
@@ -467,7 +479,7 @@ class Scene(private val window: GameWindow) {
         // Animate stars & check collision
         for (star in collectables) {
             // Collision Detection
-            if (star.distance(cycleRend) < 0.2f){
+            if (star.distance(character) < 0.2f){
                 if (star.collect()) {
                     score++
                     println(score)
@@ -477,26 +489,18 @@ class Scene(private val window: GameWindow) {
         }
 
         //Background Objects
-        ufoRend.rotateAroundPoint(dt/20, 0.0f, 0.0f,  groundRend.getWorldPosition())
-        earthRend.rotateAroundPoint(dt/20, 0.0f, 0.0f,  groundRend.getWorldPosition())
-        neptuneRend.rotateAroundPoint(dt/20, 0.0f, 0.0f,  groundRend.getWorldPosition())
-        saturnRend.rotateAroundPoint(dt/20, 0.0f, 0.0f,  groundRend.getWorldPosition())
+        ufoRend.rotateAroundPoint(dt/20, 0.0f, 0.0f,  planet.getWorldPosition())
+        earthRend.rotateAroundPoint(dt/20, 0.0f, 0.0f,  planet.getWorldPosition())
+        neptuneRend.rotateAroundPoint(dt/20, 0.0f, 0.0f,  planet.getWorldPosition())
+        saturnRend.rotateAroundPoint(dt/20, 0.0f, 0.0f,  planet.getWorldPosition())
     }
 
-    fun gravityJump() {
-        for(i in 0..10) {
-            cycleRend.translateLocal(Vector3f(0.0f, 0.0f, i.toFloat()))
-        }
-        for(i in 0..10) {
-            cycleRend.translateLocal(Vector3f(0.0f, 0.0f, -i.toFloat()))
-        }
-    }
 
     fun onKey(key: Int, scancode: Int, action: Int, mode: Int) {}
 
     fun onMouseMove(xpos: Double, ypos: Double) {
         //Bewegung in x Richtung durch Differenz zwischen alter und neuer Position
-        var deltaX: Double = xpos - oldMousePosX
+        val deltaX: Double = xpos - oldMousePosX
         var deltaY: Double = ypos - oldMousePosY
         oldMousePosX = xpos
         oldMousePosY = ypos
