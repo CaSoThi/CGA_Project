@@ -19,6 +19,7 @@ import org.joml.Vector2f
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.GL30.*
 import java.util.*
+import kotlin.math.pow
 import kotlin.random.Random;
 
 
@@ -32,6 +33,7 @@ class Scene(private val window: GameWindow) {
     private val objMeshGround: OBJLoader.OBJMesh = resGround.objects[0].meshes[0]
 
     private var groundMesh: Mesh
+    val accel_const = 1.4f //Acceleration
 
 
     // anstatt des cycles den Character einfügen?
@@ -56,8 +58,15 @@ class Scene(private val window: GameWindow) {
     private var oldMousePosX: Double = -1.0
     private var oldMousePosY: Double = -1.0
     private var einbool: Boolean = false
-    private var jumpUp = true;
-    private var jumpDown = true;
+
+    // enable jumping
+    private var canJumpUp = false;
+    private var jumpSpeed = -0.8f;
+
+    //jumping speed
+    private var yspeed = 0f
+    var ygrav = 0.005f
+    val terminalvelocity = 0.3f
 
     // Vertices und Indices der CubeMap festlegen
     var size: Float = 500.0f
@@ -300,6 +309,7 @@ class Scene(private val window: GameWindow) {
 
     fun update(dt: Float, t: Float) {
         //Farbe des Motorads wird verändert in Abhängigkeit der Zeit mit sinuswerten
+        val accel = accel_const * 4 * dt
 
         //light.lightCol = Vector3f(abs(sin(t)), abs(sin(t / 2)), abs(sin(t / 3)))
         if (window.getKeyState(GLFW_KEY_W)) {
@@ -307,6 +317,7 @@ class Scene(private val window: GameWindow) {
         }
         if (window.getKeyState(GLFW_KEY_A)) {
             cycleRend.rotateAroundPoint(0.0f, Math.toRadians(-0.25f), 0.0f, groundRend.getWorldPosition())
+
         }
         if (window.getKeyState(GLFW_KEY_D)) {
             cycleRend.rotateAroundPoint(0.0f, Math.toRadians(0.25f), 0.0f, groundRend.getWorldPosition())
@@ -314,11 +325,70 @@ class Scene(private val window: GameWindow) {
         if (window.getKeyState(GLFW_KEY_S)) {
             cycleRend.rotateAroundPoint(0.0f, 0.0f, Math.toRadians(-0.25f), groundRend.getWorldPosition())
         }
-        if(window.getKeyState(GLFW_KEY_SPACE)) {
-            //println(cycleRend.getWorldPosition().z == groundRend.getWorldPosition().z+5.1f)
 
-            gravityJump(dt)
+        // check collision with planet
+
+       // println(pointDistance3d(groundRend.x(), groundRend.y(), groundRend.z(), cycleRend.x(), cycleRend.y(), cycleRend.z())  )
+
+        println(yspeed)
+        if(checkCollisionWithPlanet()) {
+            yspeed = 0.0f;
+            if(window.getKeyState(GLFW_KEY_SPACE) && canJumpUp) {
+                println("PRESSED")
+                canJumpUp = false;
+                yspeed =jumpSpeed;
+            }
+        } else {
+            // ermöglicht neues springen und checkt ob max erreicht wurde
+
+
+
         }
+
+        if(!canJumpUp) {
+            cycleRend.setPosition(cycleRend.x(), cycleRend.y() + yspeed, cycleRend.z())
+            yspeed = Math.max(-terminalvelocity,yspeed - ygrav)
+
+        }
+
+        if(!window.getKeyState(GLFW_KEY_SPACE)) {
+            canJumpUp = true;
+            if(yspeed > 10) {
+                yspeed = 10f
+
+            }
+        }
+
+
+
+        /*if(!canJumpUp) {
+
+            yspeed += jumpSpeed;
+            if(yspeed > 0.08) {
+                yspeed = 0.08f
+            }
+        }*/
+
+           /* if(window.getKeyState(GLFW_KEY_SPACE) && canJumpUp) {
+                //println(cycleRend.getWorldPosition().z == groundRend.getWorldPosition().z+5.1f)
+                yspeed = jumpSpeed;
+                canJumpUp = false;
+
+            }
+
+
+            yspeed += jumpSpeed
+
+
+
+
+
+        if(!window.getKeyState(GLFW_KEY_SPACE)){
+            canJumpUp = true
+            if(yspeed > 8) {
+                yspeed = 8f
+            }
+        }*/
 
         // Animate stars
         for (star in collectables) {
@@ -326,23 +396,39 @@ class Scene(private val window: GameWindow) {
         }
     }
 
-    fun gravityJump(dt: Float) {
+    fun pointDistance3d(x1: Float, y1: Float, z1: Float, x2: Float, y2: Float, z2: Float):Float = Math.sqrt((x2-x1).pow(2) + (y2-y1).pow(2) + (z2-z1).pow(2))
+
+    fun checkCollisionWithPlanet(): Boolean {
+        val collision = 5.1f;
+        val currentDifference = pointDistance3d(groundRend.x(), groundRend.y(), groundRend.z(), cycleRend.x(), cycleRend.y(), cycleRend.z())
+        //println(currentDifference)
+       // println(collision)
+        if(currentDifference <= collision) {
+            return true;
+        }
+        return false;
+    }
+
+    /*fun gravityJump(dt: Float) {
         //Euler's method for numerical integration
-        /*val acc = 9.8;
+        //var JUMP_POWER = 30.0f;
+        val acc = 9.8;
         var vel = acc*dt;
         val pos = vel*dt;
-        println(pos)*/
+        println(pos)
         var i =0;
         val curPos = cycleRend.getWorldPosition();
         if(jumpUp) {
-            cycleRend.translateLocal(Vector3f(cycleRend.getWorldPosition().x*dt*100.0f, 0.0f,0.0f))
-            cycleRend.translateLocal(Vector3f(0.0f, cycleRend.getWorldPosition().y*dt*100.0f,0.0f))
+            //cycleRend.translateLocal(Vector3f(cycleRend.getWorldPosition().x*dt*100.0f, 0.0f,0.0f))
+            //cycleRend.translateLocal(Vector3f(0.0f, cycleRend.getWorldPosition().y*dt*100.0f,0.0f))
+            cycleRend.setPosition(cycleRend.x(), cycleRend.y() + vel.toFloat(), cycleRend.z())
             jumpUp = false
             jumpDown = true
             println("UP")
         }
         Timer().schedule(object : TimerTask() {
             override fun run() {
+                println(curPos)
                 cycleRend.setPosition(curPos.x, curPos.y, curPos.z)
 
                 jumpUp = true
@@ -376,7 +462,7 @@ class Scene(private val window: GameWindow) {
         }
 
      //  cycleRend.translateLocal(Vector3f(0.0f, 0.0f, pos.toFloat()))
-    }
+    }*/
 
     fun onKey(key: Int, scancode: Int, action: Int, mode: Int) {}
 
