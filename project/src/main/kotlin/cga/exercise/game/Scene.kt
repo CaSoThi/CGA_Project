@@ -23,16 +23,15 @@ import kotlin.random.Random;
 class Scene(private val window: GameWindow) {
     private val staticShader: ShaderProgram
     private val skyboxShader: ShaderProgram
-    private val phongShader : ShaderProgram
+    private val toonShader : ShaderProgram
 
+    private var shaderInUse : ShaderProgram
 
     // anstatt dem "flachen" Ground gewölbtes Ground Object verwednen?
     private val resGround: OBJLoader.OBJResult = OBJLoader.loadOBJ("project/assets/models/planet.obj")
     private val objMeshGround: OBJLoader.OBJMesh = resGround.objects[0].meshes[0]
 
     private var groundMesh: Mesh
-
-    println("Test")
 
 
     // anstatt des cycles den Character einfügen?
@@ -101,6 +100,11 @@ class Scene(private val window: GameWindow) {
     private val collectableAmount : Int = 20
     private var score : Int = 0
 
+    private var finalStarRend = Renderable()
+    private val finalStarMesh : Mesh
+    private var finalStarLight = PointLight(Vector3f(), Vector3f())
+    private var finalStar : Star
+
     //Background Objects
     private var saturnMesh: Mesh
     private var saturnRend = Renderable()
@@ -119,7 +123,10 @@ class Scene(private val window: GameWindow) {
     init {
         staticShader = ShaderProgram("project/assets/shaders/tron_vert.glsl", "project/assets/shaders/tron_frag.glsl")
         skyboxShader = ShaderProgram("project/assets/shaders/skyBoxVert.glsl", "project/assets/shaders/skyBoxFrag.glsl")
-        phongShader = ShaderProgram("project/assets/shaders/phong_vert.glsl", "project/assets/shaders/phong_frag.glsl")
+        toonShader = ShaderProgram("project/assets/shaders/tron_vert.glsl", "project/assets/shaders/toon_frag.glsl")
+
+        // Default to static shader
+        shaderInUse = staticShader
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
         glDisable(GL_CULL_FACE); GLError.checkThrow()
@@ -206,8 +213,6 @@ class Scene(private val window: GameWindow) {
         spotlight.rotateLocal(Math.toRadians(-10.0f), Math.PI.toFloat(), 0.0f)
         //spotlight2.parent = cycleRend
 
-
-
         //-----------------------------------Collectables-------------------------------------------
 
         val starEmit = Texture2D("project/assets/textures/StarColor3.png", true)
@@ -218,11 +223,11 @@ class Scene(private val window: GameWindow) {
         starDiff.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
         starSpec.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
 
-        val starMaterial = Material(starDiff, starEmit, starSpec, 40.0f, Vector2f(1.0f))
+        var starMaterial = Material(starDiff, starEmit, starSpec, 40.0f, Vector2f(1.0f))
 
 
         collectables = mutableListOf()
-        for (i in 1..collectableAmount) {
+        for (i in 0..collectableAmount) {
             val resStar: OBJLoader.OBJResult = OBJLoader.loadOBJ("project/assets/models/Star2.obj")
             val objStar: OBJLoader.OBJMesh = resStar.objects[0].meshes[0]
 
@@ -234,13 +239,13 @@ class Scene(private val window: GameWindow) {
             starRend.scaleLocal(Vector3f(0.1f))
             //starRend.rotateLocal(0.0f, 2.8f, 0.0f)
 
-            var starLight = PointLight(starRend.getWorldPosition(), Vector3f(1f)) // Light works theoretically but is in object?
-
+            var starLight = PointLight(starRend.getWorldPosition(), Vector3f(0.6f))
+            //starLight.translateGlobal(Vector3f(0.0f, 0.0f, 5.0f))
             starLight.parent = starRend
 
-            starLight.translateLocal(Vector3f(1.0f, -1.0f, 1.0f))
 
-            var star = Star(starLight, starRend, starMaterial, i)
+
+            var star = Star(starLight, starRend, starMaterial)
 
             star.setPosition(groundRend.getWorldPosition().x + 5.1f,
                     groundRend.getWorldPosition().y ,
@@ -253,6 +258,26 @@ class Scene(private val window: GameWindow) {
 
             collectables.add(star)
         }
+
+        // Stern der erscheint, nachdem alle anderen Collectables eingesammelt wurden
+        val resFinalStar: OBJLoader.OBJResult = OBJLoader.loadOBJ("project/assets/models/Star2.obj")
+        val objFinalStar: OBJLoader.OBJMesh = resFinalStar.objects[0].meshes[0]
+        finalStarMesh = Mesh(objFinalStar.vertexData, objFinalStar.indexData, objVertexAttributes, starMaterial)
+        finalStarRend = Renderable()
+        finalStarRend.scaleLocal(Vector3f(0.3f))
+        finalStarRend.rotateLocal(0.0f, 0.9f, 0.0f)
+        finalStarRend.meshList.add(finalStarMesh)
+        finalStarLight = PointLight(finalStarRend.getWorldPosition(), Vector3f(1f))
+        finalStarLight.parent = finalStarRend
+        finalStarLight.translateLocal(Vector3f(1.0f, -1.0f, 1.0f))
+        finalStar = Star(finalStarLight, finalStarRend, starMaterial)
+        finalStar.setPosition(groundRend.getWorldPosition().x + 5.22f,
+                groundRend.getWorldPosition().y ,
+                groundRend.getWorldPosition().z )
+        val randomX = Random.nextFloat() * 360f
+        val randomY = Random.nextFloat() * 360f
+        finalStar.rotateAroundPoint(0.0f, randomX, randomY, groundRend.getWorldPosition())
+
 
         //-----------------------Background Objects--------------------------------------------------
         val resSaturn: OBJLoader.OBJResult = OBJLoader.loadOBJ("project/assets/models/saturn3.obj")
@@ -275,6 +300,7 @@ class Scene(private val window: GameWindow) {
         saturnRend.translateGlobal(Vector3f(0.0f, 15.0f, 10.0f))
         saturnRend.rotateLocal(0.0f, 0.0f, 2.0f)
 
+
         val resNeptune: OBJLoader.OBJResult = OBJLoader.loadOBJ("project/assets/models/planet.obj")
         val objMeshNeptune: OBJLoader.OBJMesh = resNeptune.objects[0].meshes[0]
 
@@ -295,6 +321,7 @@ class Scene(private val window: GameWindow) {
         neptuneRend.translateGlobal(Vector3f(0.0f, -10.0f, -8.0f))
         neptuneRend.rotateLocal(0.0f, 0.0f, 2.0f)
 
+
         val resEarth: OBJLoader.OBJResult = OBJLoader.loadOBJ("project/assets/models/planet.obj")
         val objMeshEarth: OBJLoader.OBJMesh = resEarth.objects[0].meshes[0]
 
@@ -314,6 +341,7 @@ class Scene(private val window: GameWindow) {
         earthRend.scaleLocal(Vector3f(2.0f))
         earthRend.translateGlobal(Vector3f(-14.0f, -5.0f, 6.0f))
         //earthRend.rotateLocal(0.0f, 0.0f, 2.0f)
+
 
         val resUfo: OBJLoader.OBJResult = OBJLoader.loadOBJ("project/assets/models/ufo.obj")
         val objMeshUfo: OBJLoader.OBJMesh = resUfo.objects[0].meshes[0]
@@ -387,51 +415,36 @@ class Scene(private val window: GameWindow) {
         //skyboxShader.setUniform("skybox", cubeMapTexture)
         glBindVertexArray(0);
         glDepthFunc(GL_LESS);
-/*
-        //---------------------Phong Shader--------------------------------
-        phongShader.use()
-        tCamera.bind(phongShader)
-        phongShader.setUniform("objectCol", 1.0f)
-        phongShader.setUniform("lightCol", Vector3f(1.0f, 0.5f, 0.3f))
-        phongShader.setUniform("lightPos", Vector3f(0.0f, -10.0f, 0.0f))
-        phongShader.setUniform("projection", tCamera.getCalculateProjectionMatrix(), false)
-        phongShader.setUniform("view", tCamera.getCalculateViewMatrix(), false)
-        //phongShader.setUniform("model", tCamera.getWorldModelMatrix(), false)
-        cycleRend.render(phongShader)
-        groundRend.render(phongShader)
-
-*/
-
 
         //---------------------andere Sachen rendern-----------------------
 
-        staticShader.use()
-        tCamera.bind(staticShader)
+        shaderInUse.use()
+        tCamera.bind(shaderInUse)
         //staticShader.setUniform("farbe", Vector3f(abs(sin(t)), abs(sin(t / 2)), abs(sin(t / 3))))
-        staticShader.setUniform("farbe", Vector3f(1.0f))
-        cycleRend.render(staticShader)
-        light.bind(staticShader, "byklePoint")
-        spotlight.bind(staticShader, "bykleSpot", tCamera.getCalculateViewMatrix())
-        staticShader.setUniform("farbe", Vector3f(0.0f, 0.0f, 0.0f))
-        groundRend.render(staticShader)
-
-         
-
+        shaderInUse.setUniform("farbe", Vector3f(1.0f))
+        cycleRend.render(shaderInUse)
+        light.bind(shaderInUse, "byklePoint")
+        spotlight.bind(shaderInUse, "bykleSpot", tCamera.getCalculateViewMatrix())
+        shaderInUse.setUniform("farbe", Vector3f(0.0f, 0.0f, 0.0f))
+        groundRend.render(shaderInUse)
 
         //-----------------Background Objekte rendern---------------------
-        staticShader.use()
-        staticShader.setUniform("farbe", Vector3f(0.5f))
-        saturnRend.render(staticShader)
-        neptuneRend.render(staticShader)
-        earthRend.render(staticShader)
-        ufoRend.render(staticShader)
+        shaderInUse.use()
+        shaderInUse.setUniform("farbe", Vector3f(0.5f))
+        saturnRend.render(shaderInUse)
+        neptuneRend.render(shaderInUse)
+        earthRend.render(shaderInUse)
+        ufoRend.render(shaderInUse)
 
 
         //------------------collectables rendern-------------------------
         for (i in 0 until collectableAmount) {
-            collectables[i].render(staticShader, "byklePoint")
+            collectables[i].render(shaderInUse, "byklePoint")
         }
 
+        if (score >= collectableAmount){
+            finalStar.render(shaderInUse, "byklePoint")
+        }
     }
 
 
@@ -462,6 +475,14 @@ class Scene(private val window: GameWindow) {
             //}
         }
 
+        // Handle shader switching
+        if (window.getKeyState(GLFW_KEY_1)) {
+            shaderInUse = staticShader
+        }
+        if (window.getKeyState(GLFW_KEY_2)) {
+            shaderInUse = toonShader
+        }
+
 
 
         // Animate stars & check collision
@@ -474,6 +495,12 @@ class Scene(private val window: GameWindow) {
                 }
             }
             star.rotate(dt)
+        }
+
+        if (finalStar.distance(cycleRend) < 0.3f && score >= collectableAmount){
+            if (finalStar.collect()) {
+                println("Du hast gewonnen! Man bist du krass!")
+            }
         }
 
         //Background Objects

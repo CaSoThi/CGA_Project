@@ -10,19 +10,19 @@ import java.util.*
 import kotlin.math.pow
 import kotlin.math.sqrt
 
-class Star(light : PointLight, collectableObject: Renderable, material: Material, id : Int) {
+class Star(light : PointLight, collectableObject: Renderable, material: Material) {
     private var collectableObject : Renderable
     private var pointLight: PointLight
     private var collected : Boolean
     private var material : Material
-    private var id : Int
+
 
     init {
         this.collectableObject = collectableObject
         this.pointLight = light
         this.collected = false
         this.material = material
-        this.id = id
+
     }
 
     fun render(shader : ShaderProgram, name : String) {
