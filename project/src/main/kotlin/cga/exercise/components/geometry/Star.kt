@@ -1,12 +1,8 @@
 package cga.exercise.components.geometry
 
-import cga.exercise.components.camera.TronCamera
 import cga.exercise.components.light.PointLight
-import cga.exercise.components.light.SpotLight
 import cga.exercise.components.shader.ShaderProgram
-import org.joml.Math
 import org.joml.Vector3f
-import java.util.*
 import kotlin.math.pow
 import kotlin.math.sqrt
 

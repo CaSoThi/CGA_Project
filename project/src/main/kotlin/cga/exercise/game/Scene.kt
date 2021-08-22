@@ -16,7 +16,7 @@ import org.joml.*
 import org.lwjgl.opengl.GL11
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.GL30.*
-import java.util.*
+import kotlin.math.absoluteValue
 import kotlin.math.pow
 import kotlin.random.Random;
 
@@ -122,12 +122,14 @@ class Scene(private val window: GameWindow) {
     private var ufoMesh: Mesh
     private var ufoRend = Renderable()
 
+    var jumpSpeed = 0f
+    var jumpDirection = false // False = going up, True = going down
 
     //scene setup
     init {
         staticShader = ShaderProgram("project/assets/shaders/tron_vert.glsl", "project/assets/shaders/tron_frag.glsl")
         skyboxShader = ShaderProgram("project/assets/shaders/skyBoxVert.glsl", "project/assets/shaders/skyBoxFrag.glsl")
-        toonShader = ShaderProgram("project/assets/shaders/tron_vert.glsl", "project/assets/shaders/toon_frag.glsl")
+        toonShader = ShaderProgram("project/assets/shaders/toon_vert.glsl", "project/assets/shaders/toon_frag.glsl")
 
         // Default to static shader
         shaderInUse = staticShader
@@ -143,7 +145,7 @@ class Scene(private val window: GameWindow) {
         //-------------------------------------CubeMap--------------------------------------------
 
         // Einzelne Faces der CubeMap laden
-        val facesCubeMap: Vector<String> = Vector()
+        val facesCubeMap: ArrayList<String> = arrayListOf()
         facesCubeMap.addAll(
             listOf(
                 "project/assets/textures/nz.png",
@@ -422,13 +424,12 @@ class Scene(private val window: GameWindow) {
 
         shaderInUse.use()
         tCamera.bind(shaderInUse)
-        //staticShader.setUniform("farbe", Vector3f(abs(sin(t)), abs(sin(t / 2)), abs(sin(t / 3))))
         shaderInUse.setUniform("farbe", Vector3f(1.0f))
-        character.render(shaderInUse)
         light.bind(shaderInUse, "byklePoint")
         spotlight.bind(shaderInUse, "bykleSpot", tCamera.getCalculateViewMatrix())
         shaderInUse.setUniform("farbe", Vector3f(0.0f, 0.0f, 0.0f))
         planet.render(shaderInUse)
+        character.render(shaderInUse)
 
         //-----------------Background Objekte rendern---------------------
         shaderInUse.use()
@@ -450,7 +451,9 @@ class Scene(private val window: GameWindow) {
     }
 
 
+
     fun update(dt: Float, t: Float) {
+        //-----------------------Player Movement on planet------------------------
         if (yspeed == 0f) {
             if (window.getKeyState(GLFW_KEY_W)) {
                 character.rotateAroundPoint(0.0f, 0.0f, Math.toRadians(0.25f), planet.getWorldPosition())
@@ -467,64 +470,49 @@ class Scene(private val window: GameWindow) {
         }
 
 
-        // Handle shader switching
-        if (window.getKeyState(GLFW_KEY_1)) {
-            shaderInUse = staticShader
-        }
-        if (window.getKeyState(GLFW_KEY_2)) {
-            shaderInUse = toonShader
-        }
+        //---------------------------Jump Handling-------------------------------
 
-
-        // Check if char is not jumping and fell into planet
-
-
-        if (checkPlayerPos()) {
-            character.setPosition(
-                planet.getWorldPosition().x + 5.1f,
-                character.y(),
-                character.z()
-            )
-        }
-        /*if(character.y() > 0.04f) {
-            character.setPosition(character.x(), 0.0f, character.z())
-        }*/
-
-        //Jumping
-
-        //println(yspeed)
+        // Player is on the ground
         if (checkCollisionWithPlanet()) {
-            println("COLLISION")
-            yspeed = 0.0f
+            jumpSpeed = 0f
             canJump = true
-
-
+            jumpDirection = false
         }
+
+        // Player is on the ground and presses space
         if (window.getKeyState(GLFW_KEY_SPACE) && canJump) {
-            println("PRESSED")
-            canJump = false;
-            yspeed = -0.04f;
+            canJump = false
+            jumpSpeed = -0.015f
         }
+
+        // Player is airborne
         if (!canJump) {
-            yspeed += 0.001f;
+            jumpSpeed += (if (jumpDirection) -1 else 1) * 0.0005f
 
-            character.setPosition(character.x(), character.y() + yspeed, character.z())
-            println(character.y())
-            if (yspeed > 0.04) {
-                yspeed = 0.04f
 
+            // Calculate jumping vector
+            var jumpingVector = Vector3f(
+                    planet.x() - character.x(),
+                    planet.y() - character.y(),
+                    planet.z() - character.z())
+
+            jumpingVector = jumpingVector.mul(jumpSpeed)
+
+            val oldCharacterPosition = character.getWorldPosition()
+            val newCharacterPosition = oldCharacterPosition.add(jumpingVector)
+            character.setPosition(newCharacterPosition.x(), newCharacterPosition.y(), newCharacterPosition.z())
+
+            if (jumpSpeed > 0.015) {
+                jumpDirection = true
             }
 
         }
 
-
-        // Animate stars & check collision
+        //------------------Animate stars & check for player collision----------------
         for (star in collectables) {
-            // Collision Detection
             if (star.distance(character) < 0.2f) {
                 if (star.collect()) {
                     score++
-                    println(score)
                 }
             }
             star.rotate(dt)
@@ -537,39 +525,35 @@ class Scene(private val window: GameWindow) {
             }
         }
 
-        //Background Objects
+        //--------------------Movement of Background Objects-------------------------
         ufoRend.rotateAroundPoint(dt / 20, 0.0f, 0.0f, planet.getWorldPosition())
         earthRend.rotateAroundPoint(dt / 20, 0.0f, 0.0f, planet.getWorldPosition())
         neptuneRend.rotateAroundPoint(dt / 20, 0.0f, 0.0f, planet.getWorldPosition())
         saturnRend.rotateAroundPoint(dt / 20, 0.0f, 0.0f, planet.getWorldPosition())
+
+
+
+        //---------------------Handle shader switching--------------------------------
+        if (window.getKeyState(GLFW_KEY_1)) {
+            shaderInUse = staticShader
+        }
+        if (window.getKeyState(GLFW_KEY_2)) {
+            shaderInUse = toonShader
+        }
     }
 
     fun pointDistance3d(x1: Float, y1: Float, z1: Float, x2: Float, y2: Float, z2: Float): Float =
         Math.sqrt((x2 - x1).pow(2) + (y2 - y1).pow(2) + (z2 - z1).pow(2))
 
     fun checkCollisionWithPlanet(): Boolean {
-        val collisionMin = 5.1f;
+        // val collisionMin = 5.1f
         val collisionMax = 5.101f
         val currentDifference =
             pointDistance3d(planet.x(), planet.y(), planet.z(), character.x(), character.y() + yspeed, character.z())
-        //println(currentDifference)
-        // println(collision)
         if (currentDifference <= collisionMax) {
-            return true;
+            return true
         }
-        return false;
-    }
-
-    fun checkPlayerPos(): Boolean {
-        val collision = 5.09f;
-        val currentDifference =
-            pointDistance3d(planet.x(), planet.y(), planet.z(), character.x(), character.y(), character.z())
-        //println(currentDifference)
-        // println(collision)
-        if (currentDifference <= collision ) {
-            return true;
-        }
-        return false;
+        return false
     }
 
     fun onKey(key: Int, scancode: Int, action: Int, mode: Int) {}

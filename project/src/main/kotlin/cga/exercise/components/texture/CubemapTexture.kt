@@ -9,7 +9,7 @@ import org.lwjgl.opengl.GL20.glEnableVertexAttribArray
 import org.lwjgl.opengl.GL20.glVertexAttribPointer
 import org.lwjgl.opengl.GL30
 import org.lwjgl.stb.STBImage
-import java.util.*
+import kotlin.collections.ArrayList
 
 class CubemapTexture(var vertices: FloatArray, var indices: IntArray): Transformable() {
     var skyboxVAO = GL30.glGenVertexArrays()
@@ -18,7 +18,7 @@ class CubemapTexture(var vertices: FloatArray, var indices: IntArray): Transform
     var cubeMaptexID = GL30.glGenTextures()
 
 
-    fun loadCubeMap(faces: Vector<String>) : Int {
+    fun loadCubeMap(faces: ArrayList<String>) : Int {
 
         glBindVertexArray(skyboxVAO)
         glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO)
