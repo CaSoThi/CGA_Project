@@ -18,13 +18,13 @@ uniform sampler2D emit;
 uniform sampler2D specular;
 uniform float shininess;
 
-uniform vec3 byklePointLightCol;
-uniform vec3 byklePointLightAttParam;
+uniform vec3 PointLightCol;
+uniform vec3 PointLightAttParam;
 
-uniform vec3 bykleSpotLightCol;
-uniform vec3 bykleSpotLightAttParam;
-uniform vec2 bykleSpotLightAngle;
-uniform vec3 bykleSpotLightDir;
+uniform vec3 SpotLightCol;
+uniform vec3 SpotLightAttParam;
+uniform vec2 SpotLightAngle;
+uniform vec3 SpotLightDir;
 
 uniform vec3 farbe;
 
@@ -50,18 +50,18 @@ float attenuate(float len, vec3 attParam){
 }
 //Berechnung der Lichtintensität
 vec3 pointLightIntensity(vec3 lightcolour, float len){
-    return lightcolour * attenuate(len, byklePointLightAttParam);
+    return lightcolour * attenuate(len, PointLightAttParam);
 }
 
 vec3 spotLightIntensity(vec3 spotlightcolour, float len, vec3 sp, vec3 spDir){
     float costheta = dot(sp, normalize(spDir));
-    float cosphi = cos(bykleSpotLightAngle.x);
-    float cosgamma = cos(bykleSpotLightAngle.y);
+    float cosphi = cos(SpotLightAngle.x);
+    float cosgamma = cos(SpotLightAngle.y);
 
     float intensity = (costheta-cosgamma)/(cosphi-cosgamma);
     float cintensity = clamp(intensity, 0.0f, 1.0f);
 
-    return spotlightcolour * cintensity * attenuate(len, bykleSpotLightAttParam);
+    return spotlightcolour * cintensity * attenuate(len, SpotLightAttParam);
     // return spotlightcolour;
 }
 
@@ -81,8 +81,8 @@ void main(){
     vec3 result = emitCol*farbe;
 
     //ambient Term
-    float spotLightIntensity = attenuate(1.0f, spotLightIntensity(bykleSpotLightCol, spLength, sp, bykleSpotLightDir));
-    float pointLightIntensity = attenuate(1.0f, pointLightIntensity(byklePointLightCol, lpLength));
+    float spotLightIntensity = attenuate(1.0f, spotLightIntensity(SpotLightCol, spLength, sp, SpotLightDir));
+    float pointLightIntensity = attenuate(1.0f, pointLightIntensity(PointLightCol, lpLength));
     float lightIntensity = min(pointLightIntensity, spotLightIntensity);
     vec3 colorFactor;
 

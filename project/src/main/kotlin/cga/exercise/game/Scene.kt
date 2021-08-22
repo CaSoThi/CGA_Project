@@ -16,26 +16,23 @@ import org.joml.*
 import org.lwjgl.opengl.GL11
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.GL30.*
-import kotlin.math.absoluteValue
 import kotlin.math.pow
-import kotlin.random.Random;
+import kotlin.random.Random
 
 
 class Scene(private val window: GameWindow) {
     private val staticShader: ShaderProgram
     private val skyboxShader: ShaderProgram
     private val toonShader: ShaderProgram
+    private val negativeShader: ShaderProgram
 
     private var shaderInUse: ShaderProgram
 
-    // anstatt dem "flachen" Ground gewölbtes Ground Object verwednen?
     private val resGround: OBJLoader.OBJResult = OBJLoader.loadOBJ("project/assets/models/planet.obj")
     private val objMeshGround: OBJLoader.OBJMesh = resGround.objects[0].meshes[0]
 
     private var groundMesh: Mesh
 
-
-    // anstatt des cycles den Character einfügen?
     private var character = ModelLoader.loadModel(
         "project/assets/models/character.obj",
         Math.toRadians(180.0f),
@@ -47,20 +44,16 @@ class Scene(private val window: GameWindow) {
 
     private var tCamera = TronCamera()
 
-    //Anlegen des Pointlights
+    // Define lights
     private var light = PointLight(Vector3f(), Vector3f())
     private var spotlight = SpotLight(Vector3f(), Vector3f())
-
-    //private var spotlight2 = Spotlight(Vector3f(), Vector3f())
-
 
     private var oldMousePosX: Double = -1.0
     private var oldMousePosY: Double = -1.0
     private var einbool: Boolean = false
 
-
-    // Vertices und Indices der CubeMap festlegen
-    var size: Float = 500.0f
+    // Define Vertices and Indices of Cubemap
+    private var size: Float = 500.0f
     private var skyboxVertices: FloatArray = floatArrayOf(
         -size, -size, size,
         size, -size, size,
@@ -94,42 +87,34 @@ class Scene(private val window: GameWindow) {
     )
 
     private var cubeMap = CubemapTexture(skyboxVertices, skyboxIndices)
-    var cubeMapTexture = glGenTextures()
+    private var cubeMapTexture = glGenTextures()
 
-    private var yspeed = 0.0f
-    private var canJump = true
 
     // Collectable list
     private var collectables: MutableList<Star>
     private val collectableAmount: Int = 20
     private var score: Int = 0
 
-    private var finalStarRend = Renderable()
-    private val finalStarMesh: Mesh
-    private var finalStarLight = PointLight(Vector3f(), Vector3f())
     private var finalStar: Star
 
-    //Background Objects
-    private var saturnMesh: Mesh
-    private var saturnRend = Renderable()
+    // Background Objects
+    private var saturnRend: Renderable
+    private var neptuneRend: Renderable
+    private var earthRend: Renderable
+    private var ufoRend: Renderable
 
-    private var neptuneMesh: Mesh
-    private var neptuneRend = Renderable()
+    // Jumpingvaria
+    private var jumpSpeed = 0f
+    private var jumpDirection = false // False = going up, True = going down
+    private var canJump = true
 
-    private var earthMesh: Mesh
-    private var earthRend = Renderable()
 
-    private var ufoMesh: Mesh
-    private var ufoRend = Renderable()
-
-    var jumpSpeed = 0f
-    var jumpDirection = false // False = going up, True = going down
-
-    //scene setup
+    // Scene setup
     init {
         staticShader = ShaderProgram("project/assets/shaders/tron_vert.glsl", "project/assets/shaders/tron_frag.glsl")
         skyboxShader = ShaderProgram("project/assets/shaders/skyBoxVert.glsl", "project/assets/shaders/skyBoxFrag.glsl")
         toonShader = ShaderProgram("project/assets/shaders/toon_vert.glsl", "project/assets/shaders/toon_frag.glsl")
+        negativeShader = ShaderProgram("project/assets/shaders/tron_vert.glsl", "project/assets/shaders/negative_frag.glsl")
 
         // Default to static shader
         shaderInUse = staticShader
@@ -144,7 +129,7 @@ class Scene(private val window: GameWindow) {
 
         //-------------------------------------CubeMap--------------------------------------------
 
-        // Einzelne Faces der CubeMap laden
+        // Loading Cubemap faces
         val facesCubeMap: ArrayList<String> = arrayListOf()
         facesCubeMap.addAll(
             listOf(
@@ -159,8 +144,7 @@ class Scene(private val window: GameWindow) {
 
         cubeMapTexture = cubeMap.loadCubeMap(facesCubeMap)
 
-        // ---------------------------------------------------------------------------------------
-        //Erzeugen der Vertex Attribute
+        // --------------------------------Creating Vertex Attributes---------------------------------
         val stride = 8 * 4
         val attrPos = VertexAttribute(3, GL_FLOAT, stride, 0)
         val attrTC = VertexAttribute(2, GL_FLOAT, stride, 3 * 4)
@@ -168,7 +152,7 @@ class Scene(private val window: GameWindow) {
 
         val objVertexAttributes = arrayOf(attrPos, attrTC, attrNorm)
 
-        //-------------------------------------Material--------------------------------------------
+        //-------------------------------------Material------------------------------------------------
         val emitTex = Texture2D("project/assets/textures/4k_venus_atmosphere.jpg", true)
         val diffTex = Texture2D("project/assets/textures/4k_venus_atmosphere.jpg", true)
         val specTex = Texture2D("project/assets/textures/4k_venus_atmosphere.jpg", true)
@@ -189,8 +173,7 @@ class Scene(private val window: GameWindow) {
         planet.meshList.add(groundMesh)
         planet.scaleLocal(Vector3f(5.0f))
         character.scaleLocal(Vector3f(0.2f))
-        //cycleRend.rotateLocal(Math.toRadians(0.0f), Math.toRadians(90.0f), Math.toRadians(0.0f))
-        //     cycleRend.parent = groundRend
+
         character.setPosition(
             planet.getWorldPosition().x + 5.1f,
             planet.getWorldPosition().y,
@@ -203,7 +186,7 @@ class Scene(private val window: GameWindow) {
         tCamera.translateLocal(Vector3f(0.0f, 0.5f, 1.0f))
 
 
-        //----------------------------------------Licht------------------------------------------------
+        //----------------------------------------Light------------------------------------------------
         light = PointLight(tCamera.getWorldPosition(), Vector3f(1.0f))
         light.translateLocal(Vector3f(1.0f, -5.0f, 0.0f))
 
@@ -214,9 +197,7 @@ class Scene(private val window: GameWindow) {
         spotlight = SpotLight(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(0.0f))
         spotlight.rotateLocal(Math.toRadians(-90.0f), Math.PI.toFloat(), 0.0f)
         spotlight.parent = character
-        //spotlight2 = Spotlight(Vector3f(0.0f, 2.0f, -2.0f), Vector3f(1.0f))
         spotlight.rotateLocal(Math.toRadians(-10.0f), Math.PI.toFloat(), 0.0f)
-        //spotlight2.parent = cycleRend
 
         //-----------------------------------Collectables-------------------------------------------
 
@@ -228,7 +209,7 @@ class Scene(private val window: GameWindow) {
         starDiff.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
         starSpec.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
 
-        var starMaterial = Material(starDiff, starEmit, starSpec, 40.0f, Vector2f(1.0f))
+        val starMaterial = Material(starDiff, starEmit, starSpec, 40.0f, Vector2f(1.0f))
 
 
         collectables = mutableListOf()
@@ -237,19 +218,17 @@ class Scene(private val window: GameWindow) {
             val objStar: OBJLoader.OBJMesh = resStar.objects[0].meshes[0]
 
             val starMesh = Mesh(objStar.vertexData, objStar.indexData, objVertexAttributes, starMaterial)
-            var starRend = Renderable()
+            val starRend = Renderable()
 
             starRend.meshList.add(starMesh)
 
             starRend.scaleLocal(Vector3f(0.1f))
-            //starRend.rotateLocal(0.0f, 2.8f, 0.0f)
 
-            var starLight = PointLight(starRend.getWorldPosition(), Vector3f(0.6f))
-            //starLight.translateGlobal(Vector3f(0.0f, 0.0f, 5.0f))
+            val starLight = PointLight(starRend.getWorldPosition(), Vector3f(0.6f))
             starLight.parent = starRend
 
 
-            var star = Star(starLight, starRend, starMaterial)
+            val star = Star(starLight, starRend, starMaterial)
 
             star.setPosition(
                 planet.getWorldPosition().x + 5.1f,
@@ -265,15 +244,15 @@ class Scene(private val window: GameWindow) {
             collectables.add(star)
         }
 
-        // Stern der erscheint, nachdem alle anderen Collectables eingesammelt wurden
+        // Final star appears once all others are collected
         val resFinalStar: OBJLoader.OBJResult = OBJLoader.loadOBJ("project/assets/models/Star2.obj")
         val objFinalStar: OBJLoader.OBJMesh = resFinalStar.objects[0].meshes[0]
-        finalStarMesh = Mesh(objFinalStar.vertexData, objFinalStar.indexData, objVertexAttributes, starMaterial)
-        finalStarRend = Renderable()
+        val finalStarMesh = Mesh(objFinalStar.vertexData, objFinalStar.indexData, objVertexAttributes, starMaterial)
+        val finalStarRend = Renderable()
         finalStarRend.scaleLocal(Vector3f(0.3f))
         finalStarRend.rotateLocal(0.0f, 0.9f, 0.0f)
         finalStarRend.meshList.add(finalStarMesh)
-        finalStarLight = PointLight(finalStarRend.getWorldPosition(), Vector3f(1f))
+        val finalStarLight = PointLight(finalStarRend.getWorldPosition(), Vector3f(1f))
         finalStarLight.parent = finalStarRend
         finalStarLight.translateLocal(Vector3f(1.0f, -1.0f, 1.0f))
         finalStar = Star(finalStarLight, finalStarRend, starMaterial)
@@ -288,7 +267,7 @@ class Scene(private val window: GameWindow) {
 
 
         //-----------------------Background Objects--------------------------------------------------
-        val resSaturn: OBJLoader.OBJResult = OBJLoader.loadOBJ("project/assets/models/saturn3.obj")
+        val resSaturn: OBJLoader.OBJResult = OBJLoader.loadOBJ("project/assets/models/saturn2.obj")
         val objMeshSaturn: OBJLoader.OBJMesh = resSaturn.objects[0].meshes[0]
 
         val saturnEmit = Texture2D("project/assets/textures/2k_saturn.jpg", true)
@@ -301,8 +280,9 @@ class Scene(private val window: GameWindow) {
         saturnDiff.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
         saturnSpec.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
 
-        saturnMesh = Mesh(objMeshSaturn.vertexData, objMeshSaturn.indexData, objVertexAttributes, saturnMaterial)
+        val saturnMesh = Mesh(objMeshSaturn.vertexData, objMeshSaturn.indexData, objVertexAttributes, saturnMaterial)
 
+        saturnRend = Renderable()
         saturnRend.meshList.add(saturnMesh)
         saturnRend.scaleLocal(Vector3f(2.0f))
         saturnRend.translateGlobal(Vector3f(0.0f, 15.0f, 10.0f))
@@ -322,8 +302,9 @@ class Scene(private val window: GameWindow) {
         neptuneDiff.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
         neptuneSpec.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
 
-        neptuneMesh = Mesh(objMeshNeptune.vertexData, objMeshNeptune.indexData, objVertexAttributes, neptuneMaterial)
+        val neptuneMesh = Mesh(objMeshNeptune.vertexData, objMeshNeptune.indexData, objVertexAttributes, neptuneMaterial)
 
+        neptuneRend = Renderable()
         neptuneRend.meshList.add(neptuneMesh)
         neptuneRend.scaleLocal(Vector3f(2.0f))
         neptuneRend.translateGlobal(Vector3f(0.0f, -10.0f, -8.0f))
@@ -343,12 +324,12 @@ class Scene(private val window: GameWindow) {
         earthDiff.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
         earthSpec.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
 
-        earthMesh = Mesh(objMeshEarth.vertexData, objMeshEarth.indexData, objVertexAttributes, earthMaterial)
+        val earthMesh = Mesh(objMeshEarth.vertexData, objMeshEarth.indexData, objVertexAttributes, earthMaterial)
 
+        earthRend = Renderable()
         earthRend.meshList.add(earthMesh)
         earthRend.scaleLocal(Vector3f(2.0f))
         earthRend.translateGlobal(Vector3f(-14.0f, -5.0f, 6.0f))
-        //earthRend.rotateLocal(0.0f, 0.0f, 2.0f)
 
 
         val resUfo: OBJLoader.OBJResult = OBJLoader.loadOBJ("project/assets/models/ufo.obj")
@@ -364,8 +345,9 @@ class Scene(private val window: GameWindow) {
         ufoDiff.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
         ufoSpec.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
 
-        ufoMesh = Mesh(objMeshUfo.vertexData, objMeshUfo.indexData, objVertexAttributes, ufoMaterial)
+        val ufoMesh = Mesh(objMeshUfo.vertexData, objMeshUfo.indexData, objVertexAttributes, ufoMaterial)
 
+        ufoRend = Renderable()
         ufoRend.meshList.add(ufoMesh)
         ufoRend.scaleLocal(Vector3f(0.5f))
         ufoRend.translateGlobal(Vector3f(14.0f, -6.0f, -12.0f))
@@ -404,7 +386,7 @@ class Scene(private val window: GameWindow) {
     fun render(dt: Float, t: Float) {
 
         glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
-        // -----------------------Skybox rendern----------------------------
+        // -----------------------rendering Skybox----------------------------
         glDepthFunc(GL_LEQUAL)
         skyboxShader.use()
 
@@ -416,22 +398,21 @@ class Scene(private val window: GameWindow) {
         glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexture)
         glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0)
 
-        //skyboxShader.setUniform("skybox", cubeMapTexture)
         glBindVertexArray(0);
         glDepthFunc(GL_LESS);
 
-        //---------------------andere Sachen rendern-----------------------
+        //-----------------rendering Camera, Light, Character and Planet-----------------------
 
         shaderInUse.use()
         tCamera.bind(shaderInUse)
         shaderInUse.setUniform("farbe", Vector3f(1.0f))
-        light.bind(shaderInUse, "byklePoint")
-        spotlight.bind(shaderInUse, "bykleSpot", tCamera.getCalculateViewMatrix())
+        light.bind(shaderInUse, "Point")
+        spotlight.bind(shaderInUse, "Spot", tCamera.getCalculateViewMatrix())
         shaderInUse.setUniform("farbe", Vector3f(0.0f, 0.0f, 0.0f))
         planet.render(shaderInUse)
         character.render(shaderInUse)
 
-        //-----------------Background Objekte rendern---------------------
+        //----------------------rendering Background Objects-----------------------------------
         shaderInUse.use()
         shaderInUse.setUniform("farbe", Vector3f(0.5f))
         saturnRend.render(shaderInUse)
@@ -440,21 +421,21 @@ class Scene(private val window: GameWindow) {
         ufoRend.render(shaderInUse)
 
 
-        //------------------collectables rendern-------------------------
+        //------------------rendering Collectables---------------------------------------------
         for (i in 0 until collectableAmount) {
-            collectables[i].render(shaderInUse, "byklePoint")
+            collectables[i].render(shaderInUse, "Point")
         }
 
         if (score >= collectableAmount) {
-            finalStar.render(shaderInUse, "byklePoint")
+            finalStar.render(shaderInUse, "Point")
         }
     }
 
 
 
     fun update(dt: Float, t: Float) {
-        //-----------------------Player Movement on planet------------------------
-        if (yspeed == 0f) {
+        //-----------------------Player Movement on planet--------------------------------------
+        if (jumpSpeed == 0f) {
             if (window.getKeyState(GLFW_KEY_W)) {
                 character.rotateAroundPoint(0.0f, 0.0f, Math.toRadians(0.25f), planet.getWorldPosition())
             }
@@ -470,7 +451,7 @@ class Scene(private val window: GameWindow) {
         }
 
 
-        //---------------------------Jump Handling-------------------------------
+        //---------------------------Jump Handling------------------------------------------------
 
         // Player is on the ground
         if (checkCollisionWithPlanet()) {
@@ -508,7 +489,7 @@ class Scene(private val window: GameWindow) {
 
         }
 
-        //------------------Animate stars & check for player collision----------------
+        //------------------Animate stars & check for player collision-------------------------------
         for (star in collectables) {
             if (star.distance(character) < 0.2f) {
                 if (star.collect()) {
@@ -527,6 +508,7 @@ class Scene(private val window: GameWindow) {
 
         //--------------------Movement of Background Objects-------------------------
         ufoRend.rotateAroundPoint(dt / 20, 0.0f, 0.0f, planet.getWorldPosition())
+        ufoRend.rotateLocal(0.0f, dt * 5, 0.0f)
         earthRend.rotateAroundPoint(dt / 20, 0.0f, 0.0f, planet.getWorldPosition())
         neptuneRend.rotateAroundPoint(dt / 20, 0.0f, 0.0f, planet.getWorldPosition())
         saturnRend.rotateAroundPoint(dt / 20, 0.0f, 0.0f, planet.getWorldPosition())
@@ -540,6 +522,9 @@ class Scene(private val window: GameWindow) {
         if (window.getKeyState(GLFW_KEY_2)) {
             shaderInUse = toonShader
         }
+        if(window.getKeyState(GLFW_KEY_3)){
+            shaderInUse = negativeShader
+        }
     }
 
     fun pointDistance3d(x1: Float, y1: Float, z1: Float, x2: Float, y2: Float, z2: Float): Float =
@@ -549,7 +534,7 @@ class Scene(private val window: GameWindow) {
         // val collisionMin = 5.1f
         val collisionMax = 5.101f
         val currentDifference =
-            pointDistance3d(planet.x(), planet.y(), planet.z(), character.x(), character.y() + yspeed, character.z())
+            pointDistance3d(planet.x(), planet.y(), planet.z(), character.x(), character.y() + jumpSpeed, character.z())
         if (currentDifference <= collisionMax) {
             return true
         }

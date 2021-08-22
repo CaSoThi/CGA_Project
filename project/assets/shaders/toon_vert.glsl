@@ -12,9 +12,9 @@ uniform mat4 proj_matrix;
 uniform vec2 tcMultiplier;
 
 //Position von Lights entgegen nehmen
-uniform vec3 byklePointLightPos;
-uniform vec3 bykleSpotLightPos;
-uniform vec3 bykleSpot2LightPos;
+uniform vec3 PointLightPos;
+uniform vec3 SpotLightPos;
+uniform vec3 Spot2LightPos;
 
 
 out struct VertexData
@@ -38,13 +38,13 @@ void main(){
     // Pointlight im Camera Space platzieren
     // Berechnung der toLight Vektors
     // Lichtrichtung
-    vec4 lp = view_matrix * vec4(byklePointLightPos, 1.0);
+    vec4 lp = view_matrix * vec4(PointLightPos, 1.0);
     vertexData.toPointLight = (lp - pos).xyz;                          //von p zu lp (licht im camera space)
 
-    vec4 lp2 = view_matrix * vec4(bykleSpotLightPos, 1.0);
+    vec4 lp2 = view_matrix * vec4(SpotLightPos, 1.0);
     vertexData.toSpotLight = (lp2 - pos).xyz;
 
-    vec4 lp3 = view_matrix * vec4(bykleSpot2LightPos, 1.0);
+    vec4 lp3 = view_matrix * vec4(Spot2LightPos, 1.0);
     vertexData.to2SpotLight = (lp3 - pos).xyz;
 
 
