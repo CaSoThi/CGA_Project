@@ -113,7 +113,7 @@ class Scene(private val window: GameWindow) {
 
     // Collectable list
     private var collectables: MutableList<Star>
-    private val collectableAmount: Int = 2
+    private val collectableAmount: Int = 20
     private var score: Int = 0
 
     private var finalStar: Star
@@ -132,6 +132,19 @@ class Scene(private val window: GameWindow) {
 
     // Scene setup
     init {
+
+        // GAME INSTRUCTION
+        println("Welcome to your space adventure!\n")
+        println("-----------------------------Controls-----------------------------")
+        println("Press 'S' oder 'W' to move upwards or downwards the planet.")
+        println("Press 'SPACE' to jump.")
+        println("Press 'F1' or 'F2' to change the camera perspective.\n")
+        println("----------------------------How to play----------------------------\n")
+        println("Try to get all the stars and finish by collecting the big star!")
+        println("Have fun!")
+
+
+
         staticShader = ShaderProgram("project/assets/shaders/tron_vert.glsl", "project/assets/shaders/tron_frag.glsl")
         skyboxShader = ShaderProgram("project/assets/shaders/skyBoxVert.glsl", "project/assets/shaders/skyBoxFrag.glsl")
         toonShader = ShaderProgram("project/assets/shaders/toon_vert.glsl", "project/assets/shaders/toon_frag.glsl")
@@ -231,7 +244,7 @@ class Scene(private val window: GameWindow) {
 
         tCamera.parent = player
 
-        tCamera.rotateLocal(Math.toRadians(90.0f), Math.toRadians(45.0f), Math.toRadians(-90.0f))
+        tCamera.rotateLocal(Math.toRadians(90.0f), Math.toRadians(50.0f), Math.toRadians(-90.0f))
         tCamera.translateLocal(Vector3f(0.0f, 0.5f, 15.0f))
 
 
@@ -541,8 +554,6 @@ class Scene(private val window: GameWindow) {
                         turnedCamera = false
                     }
                 }
-
-
             }
         }
 
@@ -691,17 +702,22 @@ class Scene(private val window: GameWindow) {
     fun onKey(key: Int, scancode: Int, action: Int, mode: Int) {}
 
     fun onMouseMove(xpos: Double, ypos: Double) {
-        /*//Bewegung in x Richtung durch Differenz zwischen alter und neuer Position
+
+        // If camera is set to orthographical camera, the player should not be able to look around
+        if(turnedCamera) return
+
+        //Bewegung in x Richtung durch Differenz zwischen alter und neuer Position
         var deltaX: Double = xpos - oldMousePosX
         var deltaY: Double = ypos - oldMousePosY
         oldMousePosX = xpos
         oldMousePosY = ypos
 
+
         if (einbool) {
             tCamera.rotateAroundPoint(Math.toRadians(deltaX.toFloat() * 0.05f), 0.0f, 0.0f, Vector3f(0.0f))
         }
         einbool = true
-    */
+
     }
 
     fun cleanup() {}
