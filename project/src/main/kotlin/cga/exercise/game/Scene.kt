@@ -49,6 +49,8 @@ class Scene(private val window: GameWindow) {
         Math.toRadians(90.0f)
     )
 
+    private var turnedCharacterBack = false
+    private var turnedCharacterForth = true
 
     private var planet = Renderable()
 
@@ -113,10 +115,16 @@ class Scene(private val window: GameWindow) {
 
     // Collectable list
     private var collectables: MutableList<Star>
-    private val collectableAmount: Int = 20
+    private val collectableAmount: Int = 2
     private var score: Int = 0
 
     private var finalStar: Star
+
+    //Obstacles
+    private var obstacles: MutableList<Renderable>
+    private var obstacleAmount = 2
+    private var touchedObstacles = 0
+
 
     // Background Objects
     private var saturnRend: Renderable
@@ -252,13 +260,13 @@ class Scene(private val window: GameWindow) {
         light = PointLight(tCamera.getWorldPosition(), Vector3f(1.0f))
         light.translateLocal(Vector3f(1.0f, -5.0f, 0.0f))
 
-        light.parent = player
+        light.parent = tCamera
 
 
         // Spotlight mit Neigung in x und z Richtung
         spotlight = SpotLight(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(0.0f))
         spotlight.rotateLocal(Math.toRadians(-90.0f), Math.PI.toFloat(), 0.0f)
-        spotlight.parent = player
+        spotlight.parent = tCamera
         spotlight.rotateLocal(Math.toRadians(-10.0f), Math.PI.toFloat(), 0.0f)
 
         //-----------------------------------Collectables-------------------------------------------
@@ -297,9 +305,10 @@ class Scene(private val window: GameWindow) {
                 planet.getWorldPosition().y,
                 planet.getWorldPosition().z
             )
+            if (i % 2 == 0) {
+                star.translate(Vector3f(2.0f, 0.0f, 0.0f))
+            }
 
-            val randomX = Random.nextFloat() * 360f
-            val randomY = Random.nextFloat() * 360f
 
             star.rotateAroundPoint(0.0f, (i + 1) * PI.toFloat(), (i + 1).toFloat(), planet.getWorldPosition())
 
@@ -319,13 +328,67 @@ class Scene(private val window: GameWindow) {
         finalStarLight.translateLocal(Vector3f(1.0f, -1.0f, 1.0f))
         finalStar = Star(finalStarLight, finalStarRend, starMaterial)
         finalStar.setPosition(
-            planet.getWorldPosition().x + 6f,
+            planet.getWorldPosition().x + 5.4f,
             planet.getWorldPosition().y,
             planet.getWorldPosition().z
         )
         //val randomX = Random.nextFloat() * 360f
         //val randomY = Random.nextFloat() * 360f
-        finalStar.rotateAroundPoint(0.0f, 50.0f, -30.0f, planet.getWorldPosition())
+        finalStar.rotateAroundPoint(
+            0.0f,
+            (collectableAmount + 2) * PI.toFloat(),
+            (collectableAmount + 2).toFloat(),
+            planet.getWorldPosition()
+        )
+
+
+        //-----------------------Obstacle Objects---------------------------------------------------
+
+        obstacles = mutableListOf()
+        for (i in 0..obstacleAmount) {
+            val barrier = OBJLoader.loadOBJ("project/assets/models/Barrier.obj")
+            val objBarrierMesh = barrier.objects[0].meshes[0]
+
+            val barrierEmit = Texture2D("project/assets/textures/barrier1NM.png", true)
+            val barrierDiff = Texture2D("project/assets/textures/barrier1Diffuse.png", true)
+            val barrierSpec = Texture2D("project/assets/textures/barrier1Specular.png", true)
+
+            val barrierMaterial = Material(barrierDiff, barrierEmit, barrierSpec, 10.0f, Vector2f(1.0f))
+
+            barrierEmit.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
+            barrierDiff.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
+            barrierSpec.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
+
+            val barrierMesh =
+                Mesh(objBarrierMesh.vertexData, objBarrierMesh.indexData, objVertexAttributes, barrierMaterial)
+
+            var barrierRend = Renderable()
+            barrierRend.meshList.add(barrierMesh)
+            barrierRend.scaleLocal(Vector3f(0.2f))
+            barrierRend.setPosition(
+                planet.getWorldPosition().x + 5.1f,
+                planet.getWorldPosition().y,
+                planet.getWorldPosition().z
+            )
+            barrierRend.rotateLocal(Math.toRadians(90.0f), 0.0f, Math.toRadians(-90.0f))
+
+
+            barrierRend.rotateAroundPoint(
+                0.0f,
+                (i + 1) * PI.toFloat(),
+                (i + 1).toFloat(),
+                planet.getWorldPosition()
+            )
+
+
+
+            obstacles.add(barrierRend)
+
+
+        }
+
+        //barrierRend.translateGlobal(Vector3f(0.0f, 15.0f, 10.0f))
+        //barrierRend.rotateLocal(0.0f, 0.0f, 2.0f)
 
 
         //-----------------------Background Objects--------------------------------------------------
@@ -475,6 +538,14 @@ class Scene(private val window: GameWindow) {
         planet.render(shaderInUse)
         character.render(shaderInUse, dt)
 
+        //---------------------rendering obstacles--------------------------------------------
+        for (i in 0 until obstacleAmount) {
+            if (i % 2 == 0) {
+                obstacles[i].render(shaderInUse)
+            }
+
+        }
+
 
         //----------------------rendering Background Objects-----------------------------------
         shaderInUse.use()
@@ -522,7 +593,13 @@ class Scene(private val window: GameWindow) {
             }
         } else {
             if (jumpSpeed == 0f) {
+                if (checkCollisionWithObstacles()) {
+                    touchedObstacles++
+                    //println("Damn you touched $touchedObstacles obstacle(s)!")
+                    //character.movement = false
+                }
                 if (window.getKeyState(GLFW_KEY_W)) {
+
                     character.movement = true
                     direction -= 0.2f
                     player!!.setPosition(
@@ -531,6 +608,20 @@ class Scene(private val window: GameWindow) {
                         lengthdir_z(5.1f, 0.0f)
                     )
                     player!!.rotateLocal(0.0f, 0.0f, Math.toRadians(0.2f))
+                    if (turnedCamera) {
+                        if (!turnedCharacterForth && turnedCharacterBack) {
+                            character.rotateLocal(
+                                Math.toRadians(0.0f),
+                                Math.toRadians(-180.0f),
+                                Math.toRadians(0.0f)
+                            )
+                            turnedCharacterForth = true
+                            turnedCharacterBack = false
+                        }
+                    } else {
+                        turnedCharacterForth = true
+
+                    }
                 } else if (window.getKeyState(GLFW_KEY_S)) {
                     character.movement = true
                     direction += 0.2f
@@ -540,20 +631,50 @@ class Scene(private val window: GameWindow) {
                         lengthdir_z(5.1f, 0.0f)
                     )
                     player!!.rotateLocal(0.0f, 0.0f, Math.toRadians(-0.2f))
-                }
-                if (!turnedCamera) {
-                    if (window.getKeyState(GLFW_KEY_F1)) {
-                        tCamera.translateLocal(Vector3f(20.0f, 10f, -10.0f))
-                        tCamera.rotateLocal(Math.toRadians(-45.0f), Math.toRadians(45.0f), Math.toRadians(90.0f))
-                        turnedCamera = true
+
+                    if (turnedCamera) {
+                        if (!turnedCharacterBack && turnedCharacterForth) {
+                            character.rotateLocal(
+                                Math.toRadians(0.0f),
+                                Math.toRadians(180.0f),
+                                Math.toRadians(0.0f)
+                            )
+                            turnedCharacterBack = true
+                            turnedCharacterForth = false
+
+                        }
+                    } else {
+
+                        // Wenn aus orthographischer Kamera in perspektivische gewechselt wird und character nach hinten schaut, soll er nach vorne gedreht werden
+                        if (turnedCharacterBack) {
+                            character.rotateLocal(
+                                Math.toRadians(0.0f),
+                                Math.toRadians(-180.0f),
+                                Math.toRadians(0.0f)
+                            )
+                        }
+                        turnedCharacterBack = false
                     }
-                } else {
-                    if (window.getKeyState(GLFW_KEY_F2)) {
-                        tCamera.rotateLocalBack(Math.toRadians(45.0f), Math.toRadians(-45.0f), Math.toRadians(-90.0f))
-                        tCamera.translateLocal(Vector3f(20.0f, 10f, -10.0f).negate())
-                        turnedCamera = false
-                    }
+
                 }
+            }
+        }
+
+        if (!turnedCamera) {
+            if (window.getKeyState(GLFW_KEY_F1)) {
+                tCamera.translateLocal(Vector3f(20.0f, 10f, -10.0f))
+                tCamera.rotateLocal(Math.toRadians(-45.0f), Math.toRadians(45.0f), Math.toRadians(90.0f))
+                turnedCamera = true
+            }
+        } else {
+            if (window.getKeyState(GLFW_KEY_F2)) {
+                tCamera.rotateLocalBack(
+                    Math.toRadians(45.0f),
+                    Math.toRadians(-45.0f),
+                    Math.toRadians(-90.0f)
+                )
+                tCamera.translateLocal(Vector3f(20.0f, 10f, -10.0f).negate())
+                turnedCamera = false
             }
         }
 
@@ -603,34 +724,43 @@ class Scene(private val window: GameWindow) {
             if (star.distance(player!!) < 0.2f) {
                 if (star.collect()) {
                     score++
+                    println("Collected $score/$collectableAmount")
                 }
             }
             star.rotate(dt)
         }
 
+
+
         if (score >= collectableAmount && !pressedEnter && !collectedAllStars) {
             collectedAllStars = true
-            //tCamera.setPosition(tCamera.getWorldPosition().x, tCamera.getWorldPosition().y + cameraRotationSpeed, tCamera.getWorldPosition().z)
-
-            //cameraRotationSpeed += 0.01f
-
-            //if(cameraRotationSpeed > 0.05) {
-            //    cameraRotationSpeed = 0.05f
-            //}
-
-            //tCamera.rotateLocal(Math.toRadians(90.0f), Math.toRadians(45.0f), Math.toRadians(-90.0f))
 
         }
 
-        /*if (collectedAllStars) {
-            // cameraRotationSpeed += 0.01f
+        if (collectedAllStars) {
 
-            if (difference.x == 0.0f && difference.y == 0.0f && difference.z == 0.0f) {
-                difference = Vector3f(
-                    finalStar.x() - tCamera.getWorldPosition().x,
-                    finalStar.y() - tCamera.getWorldPosition().y,
-                    finalStar.z() - tCamera.getWorldPosition().z
-                )
+            tCamera.setPosition(
+                planet.getWorldPosition().x + 5.4f,
+                planet.getWorldPosition().y + 2,
+                planet.getWorldPosition().z +2
+            )
+            tCamera.rotateAroundPoint(
+                0.0f,
+                (collectableAmount + 2) * PI.toFloat(),
+                (collectableAmount + 2).toFloat(),
+                planet.getWorldPosition()
+            )
+           // tCamera.rotateLocal(Math.toRadians(90f), Math.toRadians(90f), Math.toRadians(90f))
+            collectedAllStars = false
+            pressedEnter = true
+
+
+            /*if (difference.x == 0.0f && difference.y == 0.0f && difference.z == 0.0f) {
+difference = Vector3f(
+                finalStar.x() -tCamera.getWorldPosition().x,
+                finalStar.y() -tCamera.getWorldPosition().y ,
+                finalStar.z()-tCamera.getWorldPosition().z
+            )
             }
 
             var direction = Vector3f(
@@ -640,27 +770,29 @@ class Scene(private val window: GameWindow) {
             )
 
 
-          //  println(tCamera.getWorldPosition() != finalStar.getPosition())
+            //println(pointDistance3d(tCamera.getWorldPosition().x, tCamera.getWorldPosition().y, tCamera.getWorldPosition().z, finalStar.getPosition().x, finalStar.getPosition().y, finalStar.getPosition().z))
             if (pointDistance3d(tCamera.getWorldPosition().x, tCamera.getWorldPosition().y, tCamera.getWorldPosition().z, finalStar.getPosition().x, finalStar.getPosition().y, finalStar.getPosition().z) > 0.5) {
-                println(tCamera.getWorldPosition())
-                tCamera.setPosition(
 
-                        tCamera.getWorldPosition().x + difference.x / 10.0f,
-                    tCamera.getWorldPosition().y + difference.y / 10.0f,
-                    tCamera.getWorldPosition().z + difference.z / 10.0f
+                //tCamera.getWorldPosition().x += difference.x / 20;
+                //tCamera.getWorldPosition().y += difference.y /20
+               // tCamera.getWorldPosition().z += difference.z /20
+               // tCamera.rotateAroundPoint(0.0f, 0.2f, 0.0f, planet.getWorldPosition())
+                tCamera.translateLocal(Vector3f(difference.x() /20f, difference.y()/20f, difference.z()/20f))
 
-                )
+
 
             } else {
                 println("SIND DA")
-            }
+                collectedAllStars = false
+                pressedEnter = true
+            }*/
 
-        }*/
+        }
 
 
         if (finalStar.distance(player!!) < 0.3f && score >= collectableAmount) {
             if (finalStar.collect()) {
-                println("Du hast gewonnen! Man bist du krass!")
+                println("\nCongrats! You won!")
 
             }
         }
@@ -692,9 +824,35 @@ class Scene(private val window: GameWindow) {
         // val collisionMin = 5.1f
         val collisionMax = 5.101f
         val currentDifference =
-            pointDistance3d(planet.x(), planet.y(), planet.z(), player!!.x(), player!!.y() + jumpSpeed, player!!.z())
+            pointDistance3d(
+                planet.x(),
+                planet.y(),
+                planet.z(),
+                player!!.x(),
+                player!!.y() + jumpSpeed,
+                player!!.z()
+            )
         if (currentDifference <= collisionMax) {
+            touchedObstacles++
             return true
+        }
+        return false
+    }
+
+    fun checkCollisionWithObstacles(): Boolean {
+        for (i in 0..obstacleAmount) {
+            val currentDiff = pointDistance3d(
+                player!!.x(),
+                player!!.y(),
+                player!!.z(),
+                obstacles[i].x(),
+                obstacles[i].y(),
+                obstacles[i].z()
+            )
+
+            if (currentDiff <= 0.03) {
+                return true
+            }
         }
         return false
     }
@@ -704,7 +862,7 @@ class Scene(private val window: GameWindow) {
     fun onMouseMove(xpos: Double, ypos: Double) {
 
         // If camera is set to orthographical camera, the player should not be able to look around
-        if(turnedCamera) return
+        if (turnedCamera) return
 
         //Bewegung in x Richtung durch Differenz zwischen alter und neuer Position
         var deltaX: Double = xpos - oldMousePosX

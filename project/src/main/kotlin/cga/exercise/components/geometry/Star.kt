@@ -73,6 +73,10 @@ class Star(light : PointLight, collectableObject: Renderable, material: Material
         }
     }
 
+    fun translate(dir: Vector3f) {
+        collectableObject.translateLocal(dir)
+    }
+
     fun getXDir() = this.collectableObject.getXDir()
 
     fun getYDir() = this.collectableObject.getYDir()

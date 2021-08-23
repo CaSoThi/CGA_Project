@@ -6,6 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="601d481d-759f-41fe-a1ee-880d0f01fc80" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/src/main/kotlin/cga/exercise/components/geometry/Star.kt" beforeDir="false" afterPath="$PROJECT_DIR$/project/src/main/kotlin/cga/exercise/components/geometry/Star.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/project/src/main/kotlin/cga/exercise/game/Scene.kt" beforeDir="false" afterPath="$PROJECT_DIR$/project/src/main/kotlin/cga/exercise/game/Scene.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -46,6 +47,14 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitSEFilterConfiguration">
+    <file-type-list>
+      <filtered-out-file-type name="LOCAL_BRANCH" />
+      <filtered-out-file-type name="REMOTE_BRANCH" />
+      <filtered-out-file-type name="TAG" />
+      <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
+    </file-type-list>
+  </component>
   <component name="ProjectId" id="1wu9xWM2NdgwakyHs2tEGgj2mYB" />
   <component name="ProjectLevelVcsManager">
     <ConfirmationsSetting value="1" id="Add" />
@@ -59,6 +68,7 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/project/assets/character" />
+    <property name="restartRequiresConfirmation" value="false" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -67,8 +77,9 @@
       <recent name="C:\Users\CatiSchmati\dev\CGA_Project\project\assets\models" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="H:\Uni\CGA_Project\project\assets\models" />
       <recent name="C:\Users\CatiSchmati\dev\CGA_Project\project\assets\models" />
+      <recent name="C:\Users\CatiSchmati\dev\CGA_Project\project\assets\textures" />
+      <recent name="H:\Uni\CGA_Project\project\assets\models" />
     </key>
     <key name="CopyKotlinDeclarationDialog.RECENTS_KEY">
       <recent name="cga.exercise.game" />
@@ -102,7 +113,7 @@
       <workItem from="1629361244127" duration="5264000" />
       <workItem from="1629367281917" duration="27941000" />
       <workItem from="1629556907620" duration="561000" />
-      <workItem from="1629704942866" duration="26006000" />
+      <workItem from="1629704942866" duration="39431000" />
     </task>
     <servers />
   </component>
