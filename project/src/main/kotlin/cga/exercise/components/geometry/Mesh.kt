@@ -20,7 +20,7 @@ import org.lwjgl.opengl.GL20.glVertexAttribPointer
  * Created by Fabian on 16.09.2017.
  */
 class Mesh(vertexdata: FloatArray, indexdata: IntArray, attributes: Array<VertexAttribute>,
-           private var material : Material ?= null) {
+           var material : Material ?= null) {
     //private data
     // IDs erzeugen
     private var vao = glGenVertexArrays()

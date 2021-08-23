@@ -16,8 +16,10 @@ import org.joml.*
 import org.lwjgl.opengl.GL11
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.GL30.*
+import kotlin.math.PI
 import kotlin.math.pow
 import kotlin.random.Random
+import kotlin.system.exitProcess
 
 
 class Scene(private val window: GameWindow) {
@@ -33,20 +35,35 @@ class Scene(private val window: GameWindow) {
 
     private var groundMesh: Mesh
 
-    private var character = ModelLoader.loadModel(
-        "project/assets/models/character.obj",
-        Math.toRadians(180.0f),
-        Math.toRadians(90.0f),
+    /* private var character = ModelLoader.loadModel(
+         "project/assets/models/character.obj",
+         Math.toRadians(180.0f),
+         Math.toRadians(90.0f),
+         Math.toRadians(90.0f)
+     ) ?: throw IllegalArgumentException("Could not load the model")*/
+
+    private var character: Animation
+    private var player = ModelLoader.loadModel(
+        "project/assets/character/char_0.obj", Math.toRadians(180.0f),
+        Math.toRadians(-90.0f),
         Math.toRadians(90.0f)
-    ) ?: throw IllegalArgumentException("Could not load the model")
+    )
+
+    private var movement = false
 
     private var planet = Renderable()
 
     private var tCamera = TronCamera()
 
+    private var turnedCamera = false
+
     // Define lights
     private var light = PointLight(Vector3f(), Vector3f())
     private var spotlight = SpotLight(Vector3f(), Vector3f())
+
+    private var collectedAllStars = false
+    private var pressedEnter = false
+    private var cameraRotationSpeed = 0.0f
 
     private var oldMousePosX: Double = -1.0
     private var oldMousePosY: Double = -1.0
@@ -90,9 +107,14 @@ class Scene(private val window: GameWindow) {
     private var cubeMapTexture = glGenTextures()
 
 
+    private var direction = 0.0f
+    private var directionHorizontal = 0.0f
+
+    private var difference: Vector3f = Vector3f(0.0f, 0.0f, 0.0f)
+
     // Collectable list
     private var collectables: MutableList<Star>
-    private val collectableAmount: Int = 20
+    private val collectableAmount: Int = 2
     private var score: Int = 0
 
     private var finalStar: Star
@@ -114,7 +136,8 @@ class Scene(private val window: GameWindow) {
         staticShader = ShaderProgram("project/assets/shaders/tron_vert.glsl", "project/assets/shaders/tron_frag.glsl")
         skyboxShader = ShaderProgram("project/assets/shaders/skyBoxVert.glsl", "project/assets/shaders/skyBoxFrag.glsl")
         toonShader = ShaderProgram("project/assets/shaders/toon_vert.glsl", "project/assets/shaders/toon_frag.glsl")
-        negativeShader = ShaderProgram("project/assets/shaders/tron_vert.glsl", "project/assets/shaders/negative_frag.glsl")
+        negativeShader =
+            ShaderProgram("project/assets/shaders/tron_vert.glsl", "project/assets/shaders/negative_frag.glsl")
 
         // Default to static shader
         shaderInUse = staticShader
@@ -172,31 +195,56 @@ class Scene(private val window: GameWindow) {
 
         planet.meshList.add(groundMesh)
         planet.scaleLocal(Vector3f(5.0f))
-        character.scaleLocal(Vector3f(0.2f))
 
-        character.setPosition(
+        /*player = ModelLoader.loadModel("project/assets/character/char_0.obj", Math.toRadians(0f), Math.toRadians(180f), 0f)
+        if (player == null) {
+            exitProcess(1)
+        }*/
+        //player?.meshList?.get(2)?.material?.emit = Vector3f(1f, 0f, 0f)
+        player?.scaleLocal(Vector3f(0.02f))
+        player?.setPosition(
             planet.getWorldPosition().x + 5.1f,
             planet.getWorldPosition().y,
             planet.getWorldPosition().z
         )
 
-        tCamera.parent = character
+        character = Animation("project/assets/character/char_", 0, 19, 0f, 180f, 0f)
+        character.setParent(player!!)
+
+        character.rotateLocal(Math.toRadians(-90.0f),
+            Math.toRadians(180.0f),
+            Math.toRadians(90.0f))
+
+        // character.scaleLocal(Vector3f(0.3f))
+
+
+        /* character.setPosition(
+             planet.getWorldPosition().x + 5.1f,
+             planet.getWorldPosition().y,
+             planet.getWorldPosition().z
+         )*/
+        /*character.translateLocal(
+            Vector3f(planet.getWorldPosition().x + 5.1f,
+                planet.getWorldPosition().y,
+                planet.getWorldPosition().z))*/
+
+        tCamera.parent = player
 
         tCamera.rotateLocal(Math.toRadians(90.0f), Math.toRadians(45.0f), Math.toRadians(-90.0f))
-        tCamera.translateLocal(Vector3f(0.0f, 0.5f, 1.0f))
+        tCamera.translateLocal(Vector3f(0.0f, 0.5f, 15.0f))
 
 
         //----------------------------------------Light------------------------------------------------
         light = PointLight(tCamera.getWorldPosition(), Vector3f(1.0f))
         light.translateLocal(Vector3f(1.0f, -5.0f, 0.0f))
 
-        light.parent = character
+        light.parent = player
 
 
         // Spotlight mit Neigung in x und z Richtung
         spotlight = SpotLight(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(0.0f))
         spotlight.rotateLocal(Math.toRadians(-90.0f), Math.PI.toFloat(), 0.0f)
-        spotlight.parent = character
+        spotlight.parent = player
         spotlight.rotateLocal(Math.toRadians(-10.0f), Math.PI.toFloat(), 0.0f)
 
         //-----------------------------------Collectables-------------------------------------------
@@ -239,7 +287,7 @@ class Scene(private val window: GameWindow) {
             val randomX = Random.nextFloat() * 360f
             val randomY = Random.nextFloat() * 360f
 
-            star.rotateAroundPoint(0.0f, randomX, randomY, planet.getWorldPosition())
+            star.rotateAroundPoint(0.0f, (i + 1) * PI.toFloat(), (i + 1).toFloat(), planet.getWorldPosition())
 
             collectables.add(star)
         }
@@ -257,13 +305,13 @@ class Scene(private val window: GameWindow) {
         finalStarLight.translateLocal(Vector3f(1.0f, -1.0f, 1.0f))
         finalStar = Star(finalStarLight, finalStarRend, starMaterial)
         finalStar.setPosition(
-            planet.getWorldPosition().x + 5.22f,
+            planet.getWorldPosition().x + 6f,
             planet.getWorldPosition().y,
             planet.getWorldPosition().z
         )
-        val randomX = Random.nextFloat() * 360f
-        val randomY = Random.nextFloat() * 360f
-        finalStar.rotateAroundPoint(0.0f, randomX, randomY, planet.getWorldPosition())
+        //val randomX = Random.nextFloat() * 360f
+        //val randomY = Random.nextFloat() * 360f
+        finalStar.rotateAroundPoint(0.0f, 50.0f, -30.0f, planet.getWorldPosition())
 
 
         //-----------------------Background Objects--------------------------------------------------
@@ -302,7 +350,8 @@ class Scene(private val window: GameWindow) {
         neptuneDiff.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
         neptuneSpec.setTexParams(GL_REPEAT, GL_REPEAT, GL11.GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
 
-        val neptuneMesh = Mesh(objMeshNeptune.vertexData, objMeshNeptune.indexData, objVertexAttributes, neptuneMaterial)
+        val neptuneMesh =
+            Mesh(objMeshNeptune.vertexData, objMeshNeptune.indexData, objVertexAttributes, neptuneMaterial)
 
         neptuneRend = Renderable()
         neptuneRend.meshList.add(neptuneMesh)
@@ -410,7 +459,8 @@ class Scene(private val window: GameWindow) {
         spotlight.bind(shaderInUse, "Spot", tCamera.getCalculateViewMatrix())
         shaderInUse.setUniform("farbe", Vector3f(0.0f, 0.0f, 0.0f))
         planet.render(shaderInUse)
-        character.render(shaderInUse)
+        character.render(shaderInUse, dt)
+
 
         //----------------------rendering Background Objects-----------------------------------
         shaderInUse.use()
@@ -431,22 +481,61 @@ class Scene(private val window: GameWindow) {
         }
     }
 
+    fun lengthdir_x(length: Float, dir: Float): Float =
+        (length * (Math.cos(dir.toDouble()))).toFloat() // Calculates point based on Direction and length - X
 
+    fun lengthdir_y(length: Float, dir: Float): Float =
+        (length * (Math.sin(dir.toDouble()))).toFloat() // Calculates point based on Direction and length - X
+
+    fun lengthdir_z(length: Float, dir: Float): Float =
+        (length * (-Math.sin(dir.toDouble()))).toFloat() // Calculates point based on Direction and length - Y
 
     fun update(dt: Float, t: Float) {
         //-----------------------Player Movement on planet--------------------------------------
-        if (jumpSpeed == 0f) {
-            if (window.getKeyState(GLFW_KEY_W)) {
-                character.rotateAroundPoint(0.0f, 0.0f, Math.toRadians(0.25f), planet.getWorldPosition())
+
+        character.update()
+        if (collectedAllStars) {
+            if (window.getKeyState(GLFW_KEY_ENTER)) {
+                tCamera.setPosition(player!!.x(), player!!.y(), player!!.z())
+                //tCamera.rotateLocal(Math.toRadians(90.0f), Math.toRadians(45.0f), Math.toRadians(-90.0f))
+                //tCamera.translateLocal(Vector3f(0.0f, 0.5f, 1.0f))
+                collectedAllStars = false
+                pressedEnter = true
             }
-            if (window.getKeyState(GLFW_KEY_A)) {
-                character.rotateAroundPoint(0.0f, Math.toRadians(-0.25f), 0.0f, planet.getWorldPosition())
-            }
-            if (window.getKeyState(GLFW_KEY_D)) {
-                character.rotateAroundPoint(0.0f, Math.toRadians(0.25f), 0.0f, planet.getWorldPosition())
-            }
-            if (window.getKeyState(GLFW_KEY_S)) {
-                character.rotateAroundPoint(0.0f, 0.0f, Math.toRadians(-0.25f), planet.getWorldPosition())
+        } else {
+            if (jumpSpeed == 0f) {
+                if (window.getKeyState(GLFW_KEY_W)) {
+                    character.movement = true
+                    direction -= 0.2f
+                    player!!.setPosition(
+                        lengthdir_x(5.1f, Math.toRadians(direction)),
+                        lengthdir_z(5.1f, Math.toRadians(direction)),
+                        lengthdir_z(5.1f, 0.0f)
+                    )
+                    player!!.rotateLocal(0.0f, 0.0f, Math.toRadians(0.2f))
+                } else if (window.getKeyState(GLFW_KEY_S)) {
+                    character.movement = true
+                    direction += 0.2f
+                    player!!.setPosition(
+                        lengthdir_x(5.1f, Math.toRadians(direction)),
+                        lengthdir_z(5.1f, Math.toRadians(direction)),
+                        lengthdir_z(5.1f, 0.0f)
+                    )
+                    player!!.rotateLocal(0.0f, 0.0f, Math.toRadians(-0.2f))
+                } else if(!window.getKeyState(GLFW_KEY_S) && !window.getKeyState(GLFW_KEY_W)) {
+                    println("NOT RUNNING")
+                    movement = false
+                }
+                if (!turnedCamera) {
+                    if (window.getKeyState(GLFW_KEY_F1)) {
+                        tCamera.setPosition(10.0f, 0.0f, 0.0f)
+                        tCamera.rotateLocal(Math.toRadians(-90.0f), Math.toRadians(-45.0f), Math.toRadians(90.0f))
+                        tCamera.rotateLocal(Math.toRadians(45.0f), Math.toRadians(0.0f), Math.toRadians(90.0f))
+                        tCamera.rotateLocal(Math.toRadians(45.0f), Math.toRadians(0.0f), Math.toRadians(90.0f))
+                        // tCamera.rotateLocal(Math.toRadians(90.0f),Math.toRadians(0.0f), Math.toRadians(180.0f))
+                        turnedCamera = true
+                    }
+                }
             }
         }
 
@@ -473,15 +562,16 @@ class Scene(private val window: GameWindow) {
 
             // Calculate jumping vector
             var jumpingVector = Vector3f(
-                    planet.x() - character.x(),
-                    planet.y() - character.y(),
-                    planet.z() - character.z())
+                planet.x() - player!!.x(),
+                planet.y() - player!!.y(),
+                planet.z() - player!!.z()
+            )
 
             jumpingVector = jumpingVector.mul(jumpSpeed)
 
-            val oldCharacterPosition = character.getWorldPosition()
+            val oldCharacterPosition = player!!.getWorldPosition()
             val newCharacterPosition = oldCharacterPosition.add(jumpingVector)
-            character.setPosition(newCharacterPosition.x(), newCharacterPosition.y(), newCharacterPosition.z())
+            player!!.setPosition(newCharacterPosition.x(), newCharacterPosition.y(), newCharacterPosition.z())
 
             if (jumpSpeed > 0.015) {
                 jumpDirection = true
@@ -491,7 +581,7 @@ class Scene(private val window: GameWindow) {
 
         //------------------Animate stars & check for player collision-------------------------------
         for (star in collectables) {
-            if (star.distance(character) < 0.2f) {
+            if (star.distance(player!!) < 0.2f) {
                 if (star.collect()) {
                     score++
                 }
@@ -499,10 +589,60 @@ class Scene(private val window: GameWindow) {
             star.rotate(dt)
         }
 
-        if (finalStar.distance(character) < 0.3f && score >= collectableAmount) {
+        if (score >= collectableAmount && !pressedEnter && !collectedAllStars) {
+            collectedAllStars = true
+            //tCamera.setPosition(tCamera.getWorldPosition().x, tCamera.getWorldPosition().y + cameraRotationSpeed, tCamera.getWorldPosition().z)
+
+            //cameraRotationSpeed += 0.01f
+
+            //if(cameraRotationSpeed > 0.05) {
+            //    cameraRotationSpeed = 0.05f
+            //}
+
+            //tCamera.rotateLocal(Math.toRadians(90.0f), Math.toRadians(45.0f), Math.toRadians(-90.0f))
+
+        }
+
+        /*if (collectedAllStars) {
+            // cameraRotationSpeed += 0.01f
+
+            if (difference.x == 0.0f && difference.y == 0.0f && difference.z == 0.0f) {
+                difference = Vector3f(
+                    finalStar.x() - tCamera.getWorldPosition().x,
+                    finalStar.y() - tCamera.getWorldPosition().y,
+                    finalStar.z() - tCamera.getWorldPosition().z
+                )
+            }
+
+            var direction = Vector3f(
+                finalStar.getXDir().toFloat() - tCamera.getXDir().toFloat(),
+                finalStar.getYDir().toFloat() - tCamera.getYDir().toFloat(),
+                finalStar.getZDir().toFloat() - tCamera.getZDir().toFloat()
+            )
+
+
+          //  println(tCamera.getWorldPosition() != finalStar.getPosition())
+            if (pointDistance3d(tCamera.getWorldPosition().x, tCamera.getWorldPosition().y, tCamera.getWorldPosition().z, finalStar.getPosition().x, finalStar.getPosition().y, finalStar.getPosition().z) > 0.5) {
+                println(tCamera.getWorldPosition())
+                tCamera.setPosition(
+
+                        tCamera.getWorldPosition().x + difference.x / 10.0f,
+                    tCamera.getWorldPosition().y + difference.y / 10.0f,
+                    tCamera.getWorldPosition().z + difference.z / 10.0f
+
+                )
+
+            } else {
+                println("SIND DA")
+            }
+
+        }*/
+
+
+        if (finalStar.distance(player!!) < 0.3f && score >= collectableAmount) {
             if (finalStar.collect()) {
                 println("Du hast gewonnen! Man bist du krass!")
-                
+
             }
         }
 
@@ -514,7 +654,6 @@ class Scene(private val window: GameWindow) {
         saturnRend.rotateAroundPoint(dt / 20, 0.0f, 0.0f, planet.getWorldPosition())
 
 
-
         //---------------------Handle shader switching--------------------------------
         if (window.getKeyState(GLFW_KEY_1)) {
             shaderInUse = staticShader
@@ -522,7 +661,7 @@ class Scene(private val window: GameWindow) {
         if (window.getKeyState(GLFW_KEY_2)) {
             shaderInUse = toonShader
         }
-        if(window.getKeyState(GLFW_KEY_3)){
+        if (window.getKeyState(GLFW_KEY_3)) {
             shaderInUse = negativeShader
         }
     }
@@ -534,7 +673,7 @@ class Scene(private val window: GameWindow) {
         // val collisionMin = 5.1f
         val collisionMax = 5.101f
         val currentDifference =
-            pointDistance3d(planet.x(), planet.y(), planet.z(), character.x(), character.y() + jumpSpeed, character.z())
+            pointDistance3d(planet.x(), planet.y(), planet.z(), player!!.x(), player!!.y() + jumpSpeed, player!!.z())
         if (currentDifference <= collisionMax) {
             return true
         }

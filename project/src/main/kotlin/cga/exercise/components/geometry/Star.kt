@@ -2,6 +2,7 @@ package cga.exercise.components.geometry
 
 import cga.exercise.components.light.PointLight
 import cga.exercise.components.shader.ShaderProgram
+import org.joml.Math
 import org.joml.Vector3f
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -20,6 +21,10 @@ class Star(light : PointLight, collectableObject: Renderable, material: Material
         this.material = material
 
     }
+
+    fun x() = this.collectableObject.getWorldPosition().x
+    fun y() = this.collectableObject.getWorldPosition().y
+    fun z() = this.collectableObject.getWorldPosition().z
 
     fun render(shader : ShaderProgram, name : String) {
         if (!collected) {
@@ -67,4 +72,12 @@ class Star(light : PointLight, collectableObject: Renderable, material: Material
             true
         }
     }
+
+    fun getXDir() = this.collectableObject.getXDir()
+
+    fun getYDir() = this.collectableObject.getYDir()
+
+    fun getZDir() = this.collectableObject.getZDir()
+
+    fun getPosition() = this.collectableObject.getWorldPosition()
 }

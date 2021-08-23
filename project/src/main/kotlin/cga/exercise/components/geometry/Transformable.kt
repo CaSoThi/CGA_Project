@@ -38,6 +38,16 @@ open class Transformable(var parent : Transformable? = null) : ITransformable{
         modelMat = temp.mul(modelMat)
     }
 
+    fun rotateAroundPointModified(pitch: Float, yaw: Float, roll: Float, altMidpoint: Vector3f){
+        var temp = Matrix4f()
+
+
+        temp.rotateLocal(0.002f, pitch,yaw, roll)
+
+
+        modelMat = temp.mul(modelMat)
+    }
+
     /**
      * Translates object based on its own coordinate system.
      * @param deltaPos delta positions
@@ -166,6 +176,12 @@ open class Transformable(var parent : Transformable? = null) : ITransformable{
         //model_matrix = Matrix4f().translate(Vector3f(x,y,z))
         modelMat.setTranslation(x,y,z)
     }
+
+    fun getXDir() = java.lang.Math.atan2(modelMat.m11().toDouble(), modelMat.m12().toDouble())
+
+    fun getYDir() = java.lang.Math.atan2(modelMat.m00().toDouble(), modelMat.m02().toDouble())
+
+    fun getZDir() = Math.asin(modelMat.m01()).toDouble()
 }
 
 

@@ -1,0 +1,173 @@
+# Blender MTL File: 'ModelRenderLighting2.blend'
+# Material Count: 13
+
+newmtl 40_+boots_0.1_0_0.001
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.666102 0.548405 0.670636
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 1
+map_Kd chell_legs_diffuseout.png
+map_Bump chell_legs_normalsout.png
+map_Ks chell_legs_exponentout.png
+map_d chell_legs_diffuseout.png
+
+newmtl 40_+outfit_lower_0.1_0_0
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.695012 0.574207 0.710084
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 1
+map_Kd chell_legs_diffuseout.png
+map_Bump chell_legs_normalsout.png
+map_Ks chell_legs_exponentout.png
+map_d chell_legs_diffuseout.png
+
+newmtl 40_+outfit_upper.1_0.1_0_0
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.665336 0.437648 0.798860
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 1
+map_Kd chell_torso_diffuseout.png
+map_Bump chell_torso_normalsout.png
+map_Ks chell_torso_exponentout.png
+map_d chell_torso_diffuseout.png
+
+newmtl 40_-casual_outfit.1_0.1_0_0
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.660593 0.783847 0.400512
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 1
+map_Kd chell_torso_p1_diffuseout.png
+map_Bump chell_torso_p1_diffuse_normalout.png
+map_Ks chell_torso_p1_diffuse_lightwarpout.png
+map_d chell_torso_p1_diffuseout.png
+
+newmtl 40_-casual_outfit.arms_0.1_0_0.001
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.479222 0.728573 0.441985
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 1
+map_Kd chell_torso_diffuseout.png
+map_Bump chell_torso_normalsout.png
+map_Ks chell_torso_exponentout.png
+map_d chell_torso_diffuseout.png
+
+newmtl 40_head.part.001_0.1_0_0
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.473041 0.680139 0.748751
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 1
+map_Kd chell_head_diffuseout.png
+map_Bump chell_head_normalsout.png
+map_Ks skin_warpout.png
+map_d chell_head_diffuseout.png
+
+newmtl 40_head_0.1_0_0
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.611406 0.490607 0.526012
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 1
+map_Kd chell_head_diffuseout.png
+map_Bump chell_head_normalsout.png
+map_Ks skin_warpout.png
+map_d chell_head_diffuseout.png
+
+newmtl 5_mouth_0.1_0_0.001
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.570353 0.790108 0.492414
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 1
+map_Kd chell_teethout.png
+map_d chell_teethout.png
+
+newmtl 5_teethL_0.1_0_0.001
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.759949 0.521485 0.513433
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 1
+map_Kd chell_teethout.png
+map_d chell_teethout.png
+
+newmtl 5_tongue_0.1_0_0.001
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.673615 0.637111 0.586518
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 1
+map_Kd chell_teethout.png
+map_d chell_teethout.png
+
+newmtl 6_eyes_0.1_0_0.001
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.494762 0.662173 0.527503
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 0.000000
+illum 1
+map_Kd eyes.png
+map_Bump eyes_bump.png
+map_d eyes.png
+
+newmtl 7_eyeSdw_0.1_0_0.001
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.410086 0.616359 0.655800
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 0.000000
+illum 1
+map_Kd eyeSdw.png
+map_d eyeSdw.png
+
+newmtl 7_hair_0.1_0_0.001
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.718638 0.580832 0.604469
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 0.000000
+illum 1
+map_Kd chell_hairout.png
+map_d chell_hairout.png
