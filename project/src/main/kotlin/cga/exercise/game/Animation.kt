@@ -21,7 +21,6 @@ class Animation(val path: String, val startNumber: Int, val endNumber: Int, var 
         }
     }
 
-    // Render current "frame" and cycle through the list | DT not used yet. Frame updates in the update() function now.
     fun render(shaderProgram: ShaderProgram, dt: Float) {
         if (movement) {
             animationList[currentFrame]?.render(shaderProgram)
@@ -31,7 +30,6 @@ class Animation(val path: String, val startNumber: Int, val endNumber: Int, var 
         }
     }
 
-    // Cycle through frames
     fun update() {
         if (renderCycle == 0) {
             currentFrame++
@@ -50,11 +48,11 @@ class Animation(val path: String, val startNumber: Int, val endNumber: Int, var 
         }
     }
 
-    fun scaleLocal(scale: Vector3f) {
+    /*fun scaleLocal(scale: Vector3f) {
         for (m in animationList) {
             m?.scaleLocal(scale)
         }
-    }
+    }*/
 
     fun rotateLocal(pitch: Float, yaw: Float, roll: Float) {
         for (m in animationList) {

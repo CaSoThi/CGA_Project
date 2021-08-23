@@ -49,7 +49,6 @@ class Scene(private val window: GameWindow) {
         Math.toRadians(90.0f)
     )
 
-    private var movement = false
 
     private var planet = Renderable()
 
@@ -211,9 +210,11 @@ class Scene(private val window: GameWindow) {
         character = Animation("project/assets/character/char_", 0, 19, 0f, 180f, 0f)
         character.setParent(player!!)
 
-        character.rotateLocal(Math.toRadians(-90.0f),
+        character.rotateLocal(
+            Math.toRadians(-90.0f),
             Math.toRadians(180.0f),
-            Math.toRadians(90.0f))
+            Math.toRadians(90.0f)
+        )
 
         // character.scaleLocal(Vector3f(0.3f))
 
@@ -494,11 +495,15 @@ class Scene(private val window: GameWindow) {
         //-----------------------Player Movement on planet--------------------------------------
 
         character.update()
+
+        // Character is not moving
+        if (!window.getKeyState(GLFW_KEY_S) && !window.getKeyState(GLFW_KEY_W)) {
+            character.movement = false
+        }
+
         if (collectedAllStars) {
             if (window.getKeyState(GLFW_KEY_ENTER)) {
                 tCamera.setPosition(player!!.x(), player!!.y(), player!!.z())
-                //tCamera.rotateLocal(Math.toRadians(90.0f), Math.toRadians(45.0f), Math.toRadians(-90.0f))
-                //tCamera.translateLocal(Vector3f(0.0f, 0.5f, 1.0f))
                 collectedAllStars = false
                 pressedEnter = true
             }
@@ -522,20 +527,22 @@ class Scene(private val window: GameWindow) {
                         lengthdir_z(5.1f, 0.0f)
                     )
                     player!!.rotateLocal(0.0f, 0.0f, Math.toRadians(-0.2f))
-                } else if(!window.getKeyState(GLFW_KEY_S) && !window.getKeyState(GLFW_KEY_W)) {
-                    println("NOT RUNNING")
-                    movement = false
                 }
                 if (!turnedCamera) {
                     if (window.getKeyState(GLFW_KEY_F1)) {
-                        tCamera.setPosition(10.0f, 0.0f, 0.0f)
-                        tCamera.rotateLocal(Math.toRadians(-90.0f), Math.toRadians(-45.0f), Math.toRadians(90.0f))
-                        tCamera.rotateLocal(Math.toRadians(45.0f), Math.toRadians(0.0f), Math.toRadians(90.0f))
-                        tCamera.rotateLocal(Math.toRadians(45.0f), Math.toRadians(0.0f), Math.toRadians(90.0f))
-                        // tCamera.rotateLocal(Math.toRadians(90.0f),Math.toRadians(0.0f), Math.toRadians(180.0f))
+                        tCamera.translateLocal(Vector3f(20.0f, 10f, -10.0f))
+                        tCamera.rotateLocal(Math.toRadians(-45.0f), Math.toRadians(45.0f), Math.toRadians(90.0f))
                         turnedCamera = true
                     }
+                } else {
+                    if (window.getKeyState(GLFW_KEY_F2)) {
+                        tCamera.rotateLocalBack(Math.toRadians(45.0f), Math.toRadians(-45.0f), Math.toRadians(-90.0f))
+                        tCamera.translateLocal(Vector3f(20.0f, 10f, -10.0f).negate())
+                        turnedCamera = false
+                    }
                 }
+
+
             }
         }
 
@@ -552,6 +559,7 @@ class Scene(private val window: GameWindow) {
         // Player is on the ground and presses space
         if (window.getKeyState(GLFW_KEY_SPACE) && canJump) {
             canJump = false
+            character.movement = false
             jumpSpeed = -0.015f
         }
 

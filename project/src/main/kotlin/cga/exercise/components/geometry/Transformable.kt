@@ -21,6 +21,10 @@ open class Transformable(var parent : Transformable? = null) : ITransformable{
         modelMat.rotateXYZ(pitch, yaw, roll)
     }
 
+    fun rotateLocalBack(pitch: Float, yaw: Float, roll: Float){
+        modelMat.rotateZYX(roll, yaw, pitch)
+    }
+
     /**
      * Rotates object around given rotation center.
      * @param pitch radiant angle around x-axis ccw
