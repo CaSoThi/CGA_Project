@@ -16,12 +16,9 @@ import org.joml.*
 import org.lwjgl.opengl.GL11
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.GL30.*
-import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.math.PI
 import kotlin.math.pow
-import kotlin.random.Random
-import kotlin.system.exitProcess
 
 
 class Scene(private val window: GameWindow) {
@@ -233,7 +230,7 @@ class Scene(private val window: GameWindow) {
         tCamera.translateLocal(Vector3f(0.0f, 0.5f, 15.0f))
 
         //----------------------------------------Light------------------------------------------------
-        light = PointLight(tCamera.getWorldPosition(), Vector3f(2.0f))
+        light = PointLight(tCamera.getWorldPosition(), Vector3f(1.0f))
         light.translateLocal(Vector3f(0.0f, -10.0f, 0.0f))
 
         light.parent = player
@@ -669,6 +666,15 @@ class Scene(private val window: GameWindow) {
         if (score >= collectableAmount && !pressedEnter && !collectedAllStars) {
             println("You got all stars! Now catch the big one!")
             collectedAllStars = true
+            if(turnedCamera) {
+                tCamera.rotateLocalBack(
+                    Math.toRadians(45.0f),
+                    Math.toRadians(-90.0f),
+                    Math.toRadians(-90.0f)
+                )
+                tCamera.translateLocal(Vector3f(20.0f, 8f, -10.0f).negate())
+                turnedCamera = false
+            }
         }
 
 
