@@ -1,5 +1,5 @@
 # Projektname
-Fügen Sie ihren Projektnamen hinzu
+CGA-Projekt SoSe 2021: Space Adventure
 
 # Teammitglieder
 Listen Sie hier noch einmal alle Teammitglieder auf.
@@ -17,3 +17,4 @@ Bei starker Ungleicheit der Features behalten wir uns eine individuelle Notenver
 - Hintergrundtextur durch Skybox (Aileen)
 - Verschiedene sich bewegende Hintergundobjekte (Aileen)
 - sammelbare Collectables (Sterne) zum Gewinnen des Spiels (Aileen)
+- Hindernisse (Cati)
