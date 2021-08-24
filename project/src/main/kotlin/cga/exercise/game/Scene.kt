@@ -254,7 +254,7 @@ class Scene(private val window: GameWindow) {
 
         val starMaterial = Material(starDiff, starEmit, starSpec, 40.0f, Vector2f(1.0f))
 
-
+        // create multiple collectable objects
         collectables = mutableListOf()
         for (i in 0 until collectableAmount) {
             val resStar: OBJLoader.OBJResult = OBJLoader.loadOBJ("project/assets/models/Star.obj")
@@ -288,7 +288,7 @@ class Scene(private val window: GameWindow) {
             collectables.add(star)
         }
 
-        // Final star appears once all others are collected
+        // Final star that appears once all other stars are collected
         val resFinalStar: OBJLoader.OBJResult = OBJLoader.loadOBJ("project/assets/models/Star.obj")
         val objFinalStar: OBJLoader.OBJMesh = resFinalStar.objects[0].meshes[0]
         val finalStarMesh = Mesh(objFinalStar.vertexData, objFinalStar.indexData, objVertexAttributes, starMaterial)
@@ -346,6 +346,7 @@ class Scene(private val window: GameWindow) {
 
 
         //-----------------------Background Objects--------------------------------------------------
+        // Background Objects that are placed in different Positions in the World
         val resSaturn: OBJLoader.OBJResult = OBJLoader.loadOBJ("project/assets/models/saturn.obj")
         val objMeshSaturn: OBJLoader.OBJMesh = resSaturn.objects[0].meshes[0]
 
@@ -472,7 +473,6 @@ class Scene(private val window: GameWindow) {
             }
         }
 
-
         //----------------------rendering Background Objects-----------------------------------
 
         shaderInUse.setUniform("farbe", Vector3f(0.8f))
@@ -498,8 +498,8 @@ class Scene(private val window: GameWindow) {
         (length * (-Math.sin(dir.toDouble()))).toFloat() // Calculates point based on Direction and length - Y
 
     fun update(dt: Float, t: Float) {
-        //-----------------------Player Movement on planet--------------------------------------
 
+        //-----------------------Player Movement on planet--------------------------------------
         character.update()
 
         // Character is not moving
@@ -651,6 +651,7 @@ class Scene(private val window: GameWindow) {
         }
 
         //------------------Animate stars & check for player collision-------------------------------
+        // if the Player comes near one star it is collected
         for (star in collectables) {
             if (star.distance(player!!) < 0.2f) {
                 if (star.collect()) {
@@ -662,7 +663,7 @@ class Scene(private val window: GameWindow) {
         }
 
 
-
+        // if all stars are collected the Final Star appears
         if (score >= collectableAmount && !pressedEnter && !collectedAllStars) {
             println("You got all stars! Now catch the big one!")
             collectedAllStars = true
@@ -713,6 +714,7 @@ class Scene(private val window: GameWindow) {
         }
 
         //--------------------Movement of Background Objects-------------------------
+        // Letting Background Objects move around the Planet
         ufoRend.rotateAroundPoint(dt / 20, 0.0f, 0.0f, planet.getWorldPosition())
         ufoRend.rotateLocal(0.0f, dt * 5, 0.0f)
         earthRend.rotateAroundPoint(dt / 20, 0.0f, 0.0f, planet.getWorldPosition())

@@ -14,16 +14,17 @@ import kotlin.collections.ArrayList
 class CubemapTexture(var vertices: FloatArray, var indices: IntArray): Transformable() {
     var skyboxVAO = GL30.glGenVertexArrays()
     var skyboxVBO = GL30.glGenBuffers()
-    var skyboxEBO = GL30.glGenBuffers()
+    var skyboxIBO = GL30.glGenBuffers()
     var cubeMaptexID = GL30.glGenTextures()
 
 
     fun loadCubeMap(faces: ArrayList<String>) : Int {
 
+        // Binding VAO, VBO and IBO
         glBindVertexArray(skyboxVAO)
         glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO)
         glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW)
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, skyboxEBO)
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, skyboxIBO)
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW)
         glVertexAttribPointer(0, 3, GL30.GL_FLOAT, false, 0, 0)
         glEnableVertexAttribArray(0)
@@ -40,7 +41,7 @@ class CubemapTexture(var vertices: FloatArray, var indices: IntArray): Transform
         glEnable(AMDSeamlessCubemapPerTexture.GL_TEXTURE_CUBE_MAP_SEAMLESS)
 
 
-        // Load 6 Faces of Skxbox to create CubeMap Texture
+        // Load a Face for each side of the cubemap (6 sides) to create the textured skybox
         for(i in 0..5) {
             val x = BufferUtils.createIntBuffer(1)
             val y = BufferUtils.createIntBuffer(1)
@@ -49,7 +50,7 @@ class CubemapTexture(var vertices: FloatArray, var indices: IntArray): Transform
                     ?: throw Exception("Image file \"" + faces[i] + "\" couldn't be read:\n" + STBImage.stbi_failure_reason())
             STBImage.stbi_set_flip_vertically_on_load(false)
 
-            GL30.glTexImage2D(GL30.GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL30.GL_RGBA8, x.get(), y.get(), 0, GL30.GL_RGBA, GL30.GL_UNSIGNED_BYTE, imageData);
+            GL30.glTexImage2D(GL30.GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL30.GL_RGBA8, x.get(), y.get(), 0, GL30.GL_RGBA, GL30.GL_UNSIGNED_BYTE, imageData)
             STBImage.stbi_image_free(imageData)
         }
         return cubeMaptexID
