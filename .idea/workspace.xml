@@ -4,58 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="601d481d-759f-41fe-a1ee-880d0f01fc80" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/1.JPG" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/2.JPG" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/Glass.tga" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/HQ_Movie cycle.lwo" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/HQ_Movie cycle.lxo" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/HQ_Movie cycle.mtl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/HQ_Movie cycle.mtl.backup" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/HQ_Movie cycle.obj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/MG_MovieCycle_BodyHeadLight_EMSS.tga" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/MG_MovieCycle_Body_DIFF.tga" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/MG_MovieCycle_Body_EMSS.tga" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/MG_MovieCycle_Body_NORM.tga" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/MG_MovieCycle_Body_RMMK.tga" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/MG_MovieCycle_Body_SPEC.tga" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/MG_MovieCycle_Body_SPPW.tga" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/MG_MovieCycle_Engine_DIFF.tga" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/MG_MovieCycle_Engine_EMSS.tga" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/MG_MovieCycle_Engine_MASK.tga" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/MG_MovieCycle_Engine_NORM.tga" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/MG_MovieCycle_Tire_DIFF.tga" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/MG_MovieCycle_Tire_EMSS.tga" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/MG_MovieCycle_Tire_MASK.tga" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/MG_MovieCycle_Tire_NORM.tga" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/MG_Player_Baton_DIFF.tga" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/MG_Player_Baton_EMSS.tga" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/MG_Player_Baton_NORM.tga" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/MG_Player_Baton_RMMK.tga" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/MG_Player_Baton_SPEC.tga" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/MG_Player_Baton_SPPW.tga" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/MG_Player_Body_DIFF.tga" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/MG_Player_Body_EMSS.tga" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/MG_Player_Body_NORM.tga" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/MG_Player_Body_RMMK.tga" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/MG_Player_Body_SPEC.tga" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/MG_Player_Body_SPPW.tga" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/MG_Player_Disc_DIFF.tga" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/MG_Player_Disc_EMSS.tga" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/MG_Player_Disc_NORM.tga" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/MG_Player_Disc_RMMK.tga" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/MG_Player_Disc_SPEC.tga" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/MG_Player_Disc_SPPW.tga" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/MG_Player_Helmet_DIFF.tga" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/MG_Player_Helmet_EMSS.tga" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/MG_Player_Helmet_NORM.tga" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/MG_Player_Helmet_RMMK.tga" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/MG_Player_Helmet_SPEC.tga" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/Light Cycle/Light Cycle/MG_Player_Helmet_SPPW.tga" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/shaders/toon_frag.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/project/assets/shaders/toon_frag.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/src/main/kotlin/cga/exercise/game/Scene.kt" beforeDir="false" afterPath="$PROJECT_DIR$/project/src/main/kotlin/cga/exercise/game/Scene.kt" afterDir="false" />
-    </list>
+    <list default="true" id="601d481d-759f-41fe-a1ee-880d0f01fc80" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -162,7 +111,7 @@
       <workItem from="1629556907620" duration="561000" />
       <workItem from="1629704942866" duration="39809000" />
       <workItem from="1629791998137" duration="12932000" />
-      <workItem from="1629816294572" duration="4654000" />
+      <workItem from="1629816294572" duration="5102000" />
     </task>
     <servers />
   </component>
