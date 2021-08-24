@@ -21,3 +21,4 @@ Bei starker Ungleicheit der Features behalten wir uns eine individuelle Notenver
 
 ## Quellen
 - Charactermodell aus: https://www.youtube.com/playlist?list=PLFt_AvWsXl0fEx02iXR8uhDsVGhmM9Pse
+- Texturen aus: https://www.solarsystemscope.com/textures/
