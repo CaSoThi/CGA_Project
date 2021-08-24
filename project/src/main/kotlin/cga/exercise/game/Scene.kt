@@ -140,7 +140,8 @@ class Scene(private val window: GameWindow) {
         println("-----------------------------Controls-----------------------------")
         println("Press 'S' oder 'W' to move upwards or downwards the planet.")
         println("Press 'SPACE' to jump.")
-        println("Press 'F1' or 'F2' to change the camera perspective.\n")
+        println("Press 'F1' or 'F2' to change the camera perspective.")
+        println("Press '1', '2' or '3' to switch between shaders.\n")
         println("----------------------------How to play----------------------------\n")
         println("Try to get all the stars and finish by collecting the big star!")
         println("Have fun!")
@@ -232,9 +233,10 @@ class Scene(private val window: GameWindow) {
 
         //----------------------------------------Light------------------------------------------------
         light = PointLight(tCamera.getWorldPosition(), Vector3f(2.0f))
-        light.translateLocal(Vector3f(0.0f, -5.0f, 0.0f))
+        light.translateLocal(Vector3f(0.0f, -10.0f, 0.0f))
 
-        light.parent = tCamera
+        light.parent = player
+        //light.parent = tCamera
 
         // Spotlight mit Neigung in x und z Richtung
         spotlight = SpotLight(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(0.0f))
@@ -474,8 +476,8 @@ class Scene(private val window: GameWindow) {
 
 
         //----------------------rendering Background Objects-----------------------------------
-        shaderInUse.use()
-        shaderInUse.setUniform("farbe", Vector3f(0.5f))
+
+        shaderInUse.setUniform("farbe", Vector3f(0.4f))
         saturnRend.render(shaderInUse)
         neptuneRend.render(shaderInUse)
         earthRend.render(shaderInUse)

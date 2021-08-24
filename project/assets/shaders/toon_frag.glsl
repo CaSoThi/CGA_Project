@@ -81,22 +81,23 @@ void main(){
 
     //ambient Term
     //float spotLightIntensity = attenuate(1.0f, spotLightIntensity(SpotLightCol, spLength, sp, SpotLightDir));
-    float plI = attenuate(1.0f, pointLightIntensity(PointLightCol, lpLength));
+    //float plI = attenuate(1.0f, pointLightIntensity(PointLightCol, lpLength));
 
     //light graduation
-    //float lightIntensity =  plI; //max(1.0, dot(pointLightIntensity,spotLightIntensity));
+    //float lightIntensity = max(1.0, dot(pointLightIntensity,spotLightIntensity));
     vec3 colorFactor;
+    float pointLightIntensity = attenuate(1.0f, pointLightIntensity(PointLightCol, lpLength));
     float lightIntensity = max(0.0f, dot(vertexData.toPointLight, n));
 
-    if (lightIntensity > 0.95f) {
+    if (lightIntensity > 9.75) {
         colorFactor = vec3(1.0);
-    } else if (lightIntensity > 0.7) {
-        colorFactor = vec3(0.8);
+    } else if (lightIntensity > 0.8) {
+        colorFactor = vec3(0.9);
     } else if (lightIntensity > 0.6) {
         colorFactor = vec3(0.7);
-    } else if (lightIntensity > 0.45) {
+    } else if (lightIntensity > 0.5) {
         colorFactor = vec3(0.6);
-    } else if (lightIntensity > 0.35) {
+    } else if (lightIntensity > 0.4) {
         colorFactor = vec3(0.55);
     } else {
         colorFactor = vec3(0.5);
