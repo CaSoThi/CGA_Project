@@ -267,7 +267,7 @@ class Scene(private val window: GameWindow) {
 
 
         collectables = mutableListOf()
-        for (i in 0..collectableAmount) {
+        for (i in 0 until collectableAmount) {
             val resStar: OBJLoader.OBJResult = OBJLoader.loadOBJ("project/assets/models/Star2.obj")
             val objStar: OBJLoader.OBJMesh = resStar.objects[0].meshes[0]
 
@@ -322,7 +322,7 @@ class Scene(private val window: GameWindow) {
         //-----------------------Obstacle Objects---------------------------------------------------
 
         obstacles = mutableListOf()
-        for (i in 0..obstacleAmount) {
+        for (i in 0 until obstacleAmount) {
             val barrier = OBJLoader.loadOBJ("project/assets/models/Barrier.obj")
             val objBarrierMesh = barrier.objects[0].meshes[0]
 
@@ -538,17 +538,8 @@ class Scene(private val window: GameWindow) {
             }
         } else {
             if (jumpSpeed == 0f) {
-                if (touched  ) {
-
-                    if(window.getKeyState(GLFW_KEY_SPACE)) {
-                        touched = false
-                        println("Hey you seem to know how to jump ! ")
-                    } else {
-                        //touched = false
-                        println("Jump you fool!")
-                    }
-                    //println("Damn you touched $touchedObstacles obstacle(s)!")
-                    //character.movement = false
+                if (checkCollisionWithObstacles()  ) {
+                    //Disables movement
                 } else {
                     if (window.getKeyState(GLFW_KEY_W)) {
 
@@ -658,7 +649,7 @@ class Scene(private val window: GameWindow) {
             // Calculate jumping vector
             var jumpingVector = Vector3f(
                 planet.x() - player!!.x(),
-                planet.y() - player!!.y() ,
+                planet.y() - player!!.y(),
                 planet.z() - player!!.z()
             )
 
@@ -666,7 +657,7 @@ class Scene(private val window: GameWindow) {
 
             val oldCharacterPosition = player!!.getWorldPosition()
             val newCharacterPosition = oldCharacterPosition.add(jumpingVector)
-            player!!.setPosition(newCharacterPosition.x(), newCharacterPosition.y(), newCharacterPosition.z())
+            player!!.setPosition(newCharacterPosition.x(), newCharacterPosition.y() , newCharacterPosition.z())
 
             if (jumpSpeed > 0.015) {
                 jumpDirection = true
@@ -771,7 +762,7 @@ class Scene(private val window: GameWindow) {
     }
 
     fun checkCollisionWithObstacles(): Boolean {
-        for (i in 0..obstacleAmount) {
+        for (i in 0 until obstacleAmount) {
             if(i % 2 == 0) {
                 val currentDiff = pointDistance3d(
                     player!!.x(),
@@ -782,7 +773,7 @@ class Scene(private val window: GameWindow) {
                     obstacles[i].z()
                 )
 
-                if (currentDiff <= 0.03) {
+                if (currentDiff <= 0.01) {
                     touched = true
                     return true
                 }
