@@ -243,10 +243,9 @@ class Scene(private val window: GameWindow) {
 
         //----------------------------------------Light------------------------------------------------
         light = PointLight(tCamera.getWorldPosition(), Vector3f(2.0f))
-        light.translateLocal(Vector3f(1.0f, -5.0f, 0.0f))
+        light.translateLocal(Vector3f(0.0f, -5.0f, 0.0f))
 
         light.parent = tCamera
-
 
         // Spotlight mit Neigung in x und z Richtung
         spotlight = SpotLight(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(0.0f))
@@ -306,7 +305,7 @@ class Scene(private val window: GameWindow) {
         val finalStarMesh = Mesh(objFinalStar.vertexData, objFinalStar.indexData, objVertexAttributes, starMaterial)
         val finalStarRend = Renderable()
         finalStarRend.scaleLocal(Vector3f(0.3f))
-        finalStarRend.rotateLocal(0.0f, 0.9f, 0.0f)
+        finalStarRend.rotateLocal(9.2f, 0.9f, 0.0f)
         finalStarRend.meshList.add(finalStarMesh)
         val finalStarLight = PointLight(finalStarRend.getWorldPosition(), Vector3f(1f))
         finalStarLight.parent = finalStarRend
@@ -317,6 +316,7 @@ class Scene(private val window: GameWindow) {
             planet.getWorldPosition().y,
             planet.getWorldPosition().z
         )
+
 
 
         //-----------------------Obstacle Objects---------------------------------------------------
@@ -473,9 +473,10 @@ class Scene(private val window: GameWindow) {
         shaderInUse.setUniform("farbe", Vector3f(1.0f))
         light.bind(shaderInUse, "Point")
         spotlight.bind(shaderInUse, "Spot", tCamera.getCalculateViewMatrix())
-        shaderInUse.setUniform("farbe", Vector3f(0.0f, 0.0f, 0.0f))
+        shaderInUse.setUniform("farbe", Vector3f(0.4f))
         planet.render(shaderInUse)
         character.render(shaderInUse, dt)
+        shaderInUse.setUniform("farbe", Vector3f(0.0f))
 
         //---------------------rendering obstacles--------------------------------------------
         for (i in 0 until obstacleAmount) {

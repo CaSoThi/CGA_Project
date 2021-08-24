@@ -4,33 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="601d481d-759f-41fe-a1ee-880d0f01fc80" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/chell/0.dae" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/chell/0.fbx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/chell/0.mtl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/chell/0.obj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/chell/0.stl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/chell/chell_hairout.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/chell/chell_head_diffuseout.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/chell/chell_head_normalsout.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/chell/chell_legs_diffuseout.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/chell/chell_legs_exponentout.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/chell/chell_legs_normalsout.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/chell/chell_teethout.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/chell/chell_torso_diffuseout.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/chell/chell_torso_exponentout.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/chell/chell_torso_normalsout.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/chell/chell_torso_p1_diffuse_lightwarpout.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/chell/chell_torso_p1_diffuse_normalout.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/chell/chell_torso_p1_diffuseout.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/chell/eyeSdw.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/chell/eyes.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/chell/eyes_bump.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/chell/skin_warpout.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/assets/chell/xps.xps" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/src/main/kotlin/cga/exercise/game/Scene.kt" beforeDir="false" afterPath="$PROJECT_DIR$/project/src/main/kotlin/cga/exercise/game/Scene.kt" afterDir="false" />
-    </list>
+    <list default="true" id="601d481d-759f-41fe-a1ee-880d0f01fc80" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />

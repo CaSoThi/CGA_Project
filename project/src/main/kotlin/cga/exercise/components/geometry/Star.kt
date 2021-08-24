@@ -49,7 +49,7 @@ class Star(light : PointLight, collectableObject: Renderable, material: Material
 
      fun setPosition(x: Float, y: Float, z: Float) {
         this.collectableObject.setPosition(x, y, z)
-        this.pointLight.setPosition(x, y + 1f, z)
+        this.pointLight.setPosition(x + 4 , y + 4, z + 4)
     }
 
     fun rotate(amount: Float) {

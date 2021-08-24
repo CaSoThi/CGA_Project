@@ -11,6 +11,7 @@ uniform mat4 view_matrix;
 uniform mat4 proj_matrix;
 uniform vec2 tcMultiplier;
 
+
 //Position von Lights entgegen nehmen
 uniform vec3 PointLightPos;
 uniform vec3 SpotLightPos;

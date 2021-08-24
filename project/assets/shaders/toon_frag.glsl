@@ -28,7 +28,6 @@ uniform vec3 SpotLightDir;
 
 uniform vec3 farbe;
 
-
 //fragment shader output
 out vec4 color;
 
@@ -70,8 +69,8 @@ void main(){
     vec3 v = normalize(vertexData.position);
     float lpLength = length(vertexData.toPointLight);
     vec3 lp = vertexData.toPointLight/lpLength;
-    float spLength = length(vertexData.toSpotLight);
-    vec3 sp = vertexData.toSpotLight/spLength;
+    //float spLength = length(vertexData.toSpotLight);
+    //vec3 sp = vertexData.toSpotLight/spLength;
     vec3 diffCol = texture(diff, vertexData.texture).rgb;
     vec3 emitCol = texture(emit, vertexData.texture).rgb;
     vec3 specularCol = texture(specular, vertexData.texture).rgb;
@@ -81,23 +80,29 @@ void main(){
     vec3 result = emitCol*farbe;
 
     //ambient Term
-    float spotLightIntensity = attenuate(1.0f, spotLightIntensity(SpotLightCol, spLength, sp, SpotLightDir));
-    float pointLightIntensity = attenuate(1.0f, pointLightIntensity(PointLightCol, lpLength));
-    float lightIntensity = min(pointLightIntensity, spotLightIntensity);
+    //float spotLightIntensity = attenuate(1.0f, spotLightIntensity(SpotLightCol, spLength, sp, SpotLightDir));
+    float plI = attenuate(1.0f, pointLightIntensity(PointLightCol, lpLength));
+
+    //light graduation
+    //float lightIntensity =  plI; //max(1.0, dot(pointLightIntensity,spotLightIntensity));
     vec3 colorFactor;
+    float lightIntensity = max(0.0f, dot(vertexData.toPointLight, n));
 
     if (lightIntensity > 0.95f) {
         colorFactor = vec3(1.0);
-    } else if (lightIntensity > 0.8) {
+    } else if (lightIntensity > 0.7) {
         colorFactor = vec3(0.8);
     } else if (lightIntensity > 0.6) {
+        colorFactor = vec3(0.7);
+    } else if (lightIntensity > 0.45) {
         colorFactor = vec3(0.6);
-    } else if (lightIntensity > 0.4) {
-        colorFactor = vec3(0.4);
+    } else if (lightIntensity > 0.35) {
+        colorFactor = vec3(0.55);
     } else {
-        colorFactor = vec3(0.2);
+        colorFactor = vec3(0.5);
     }
 
     result += shade(n, lp, v, diffCol, specularCol, shininess);
     color = vec4(result * colorFactor, 1.0);
+
 }
