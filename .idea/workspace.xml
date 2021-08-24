@@ -4,7 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="601d481d-759f-41fe-a1ee-880d0f01fc80" name="Changes" comment="" />
+    <list default="true" id="601d481d-759f-41fe-a1ee-880d0f01fc80" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/project/assets/models/barrier1.obj" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/assets/models/character.mtl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/assets/models/character.obj" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/assets/textures/14740.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/assets/textures/grass.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/assets/textures/planet.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/assets/textures/planet1.jpg" beforeDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -111,7 +119,7 @@
       <workItem from="1629556907620" duration="561000" />
       <workItem from="1629704942866" duration="39809000" />
       <workItem from="1629791998137" duration="12932000" />
-      <workItem from="1629816294572" duration="5102000" />
+      <workItem from="1629816294572" duration="5494000" />
     </task>
     <servers />
   </component>
