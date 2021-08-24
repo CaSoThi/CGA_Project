@@ -257,7 +257,7 @@ class Scene(private val window: GameWindow) {
 
         collectables = mutableListOf()
         for (i in 0 until collectableAmount) {
-            val resStar: OBJLoader.OBJResult = OBJLoader.loadOBJ("project/assets/models/Star2.obj")
+            val resStar: OBJLoader.OBJResult = OBJLoader.loadOBJ("project/assets/models/Star.obj")
             val objStar: OBJLoader.OBJMesh = resStar.objects[0].meshes[0]
 
             val starMesh = Mesh(objStar.vertexData, objStar.indexData, objVertexAttributes, starMaterial)
@@ -289,7 +289,7 @@ class Scene(private val window: GameWindow) {
         }
 
         // Final star appears once all others are collected
-        val resFinalStar: OBJLoader.OBJResult = OBJLoader.loadOBJ("project/assets/models/Star2.obj")
+        val resFinalStar: OBJLoader.OBJResult = OBJLoader.loadOBJ("project/assets/models/Star.obj")
         val objFinalStar: OBJLoader.OBJMesh = resFinalStar.objects[0].meshes[0]
         val finalStarMesh = Mesh(objFinalStar.vertexData, objFinalStar.indexData, objVertexAttributes, starMaterial)
         val finalStarRend = Renderable()
@@ -346,7 +346,7 @@ class Scene(private val window: GameWindow) {
 
 
         //-----------------------Background Objects--------------------------------------------------
-        val resSaturn: OBJLoader.OBJResult = OBJLoader.loadOBJ("project/assets/models/saturn2.obj")
+        val resSaturn: OBJLoader.OBJResult = OBJLoader.loadOBJ("project/assets/models/saturn.obj")
         val objMeshSaturn: OBJLoader.OBJMesh = resSaturn.objects[0].meshes[0]
 
         val saturnEmit = Texture2D("project/assets/textures/2k_saturn.jpg", true)
@@ -475,7 +475,7 @@ class Scene(private val window: GameWindow) {
 
         //----------------------rendering Background Objects-----------------------------------
 
-        shaderInUse.setUniform("farbe", Vector3f(0.4f))
+        shaderInUse.setUniform("farbe", Vector3f(0.8f))
         saturnRend.render(shaderInUse)
         neptuneRend.render(shaderInUse)
         earthRend.render(shaderInUse)

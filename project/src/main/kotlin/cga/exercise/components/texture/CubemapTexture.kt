@@ -32,7 +32,6 @@ class CubemapTexture(var vertices: FloatArray, var indices: IntArray): Transform
         glBindBuffer(GL30.GL_ELEMENT_ARRAY_BUFFER, 0)
         glBindTexture(GL30.GL_TEXTURE_CUBE_MAP, cubeMaptexID)
 
-
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
@@ -40,6 +39,8 @@ class CubemapTexture(var vertices: FloatArray, var indices: IntArray): Transform
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE)
         glEnable(AMDSeamlessCubemapPerTexture.GL_TEXTURE_CUBE_MAP_SEAMLESS)
 
+
+        // Load 6 Faces of Skxbox to create CubeMap Texture
         for(i in 0..5) {
             val x = BufferUtils.createIntBuffer(1)
             val y = BufferUtils.createIntBuffer(1)

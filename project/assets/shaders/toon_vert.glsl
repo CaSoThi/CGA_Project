@@ -4,7 +4,7 @@ layout(location = 0) in vec3 position;
 layout(location =  1) in vec2 tc;
 layout(location = 2) in vec3 normale;
 
-//uniforms
+// uniforms
 // translation object to world
 uniform mat4 model_matrix;
 uniform mat4 view_matrix;
@@ -12,7 +12,7 @@ uniform mat4 proj_matrix;
 uniform vec2 tcMultiplier;
 
 
-//Position von Lights entgegen nehmen
+//Position of Light
 uniform vec3 PointLightPos;
 uniform vec3 SpotLightPos;
 uniform vec3 Spot2LightPos;
@@ -30,15 +30,14 @@ out struct VertexData
 } vertexData;
 
 
-
 void main(){
     mat4 modelView = view_matrix * model_matrix;
     vec4 pos =  modelView * vec4(position, 1.0f);
     vec4 nor = inverse(transpose(modelView)) * vec4(normale, 0.0f);
 
-    // Pointlight im Camera Space platzieren
-    // Berechnung der toLight Vektors
-    // Lichtrichtung
+    // Place PointLight in Camera Space
+    // Calculation of toLight Vektors
+    // Light Direction
     vec4 lp = view_matrix * vec4(PointLightPos, 1.0);
     vertexData.toPointLight = (lp - pos).xyz;                          //von p zu lp (licht im camera space)
 
