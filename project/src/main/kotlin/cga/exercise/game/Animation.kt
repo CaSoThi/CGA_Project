@@ -4,7 +4,6 @@ import cga.exercise.components.geometry.Renderable
 import cga.exercise.components.shader.ShaderProgram
 import cga.framework.ModelLoader
 import org.joml.Math
-import org.joml.Vector3f
 
 class Animation(val path: String, val startNumber: Int, val endNumber: Int, var rotx: Float, var roty: Float, var rotz: Float) {
 
@@ -13,7 +12,6 @@ class Animation(val path: String, val startNumber: Int, val endNumber: Int, var 
     var renderCycle = 0
     var movement = false
 
-    // Load in all the obj files for every "frame"
     init {
         for (i in startNumber .. endNumber) {
             animationList.add(ModelLoader.loadModel("${path}${i}.obj",
@@ -47,12 +45,6 @@ class Animation(val path: String, val startNumber: Int, val endNumber: Int, var 
             m?.parent = p
         }
     }
-
-    /*fun scaleLocal(scale: Vector3f) {
-        for (m in animationList) {
-            m?.scaleLocal(scale)
-        }
-    }*/
 
     fun rotateLocal(pitch: Float, yaw: Float, roll: Float) {
         for (m in animationList) {

@@ -37,13 +37,6 @@ class Scene(private val window: GameWindow) {
 
     private var groundMesh: Mesh
 
-    /* private var character = ModelLoader.loadModel(
-         "project/assets/models/character.obj",
-         Math.toRadians(180.0f),
-         Math.toRadians(90.0f),
-         Math.toRadians(90.0f)
-     ) ?: throw IllegalArgumentException("Could not load the model")*/
-
     private var character: Animation
     private var player = ModelLoader.loadModel(
         "project/assets/character/char_0.obj", Math.toRadians(180.0f),
@@ -51,6 +44,7 @@ class Scene(private val window: GameWindow) {
         Math.toRadians(90.0f)
     )
 
+    //Checks character rotation during orthographic camera
     private var turnedCharacterBack = false
     private var turnedCharacterForth = true
 
@@ -60,6 +54,7 @@ class Scene(private val window: GameWindow) {
 
     private var turnedCamera = false
 
+    // Counts translations of camera during zoom
     private var turnedCamCounter = 0
 
     // Define lights
@@ -68,7 +63,6 @@ class Scene(private val window: GameWindow) {
 
     private var collectedAllStars = false
     private var pressedEnter = false
-    private var cameraRotationSpeed = 0.0f
 
     private var oldMousePosX: Double = -1.0
     private var oldMousePosY: Double = -1.0
@@ -113,8 +107,6 @@ class Scene(private val window: GameWindow) {
 
 
     private var direction = 0.0f
-    private var directionHorizontal = 0.0f
-
     private var difference: Vector3f = Vector3f(0.0f, 0.0f, 0.0f)
 
     // Collectable list
@@ -127,8 +119,6 @@ class Scene(private val window: GameWindow) {
     //Obstacles
     private var obstacles: MutableList<Renderable>
     private var obstacleAmount = 20
-    private var touchedObstacles = 0
-    private var touched = false
 
     // Background Objects
     private var saturnRend: Renderable
@@ -169,7 +159,6 @@ class Scene(private val window: GameWindow) {
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
         glDisable(GL_CULL_FACE); GLError.checkThrow()
-        //glEnable(GL_CULL_FACE)
         glFrontFace(GL_CCW)
         glCullFace(GL_BACK)
         glEnable(GL_DEPTH_TEST); GLError.checkThrow()
@@ -309,14 +298,12 @@ class Scene(private val window: GameWindow) {
         finalStarRend.meshList.add(finalStarMesh)
         val finalStarLight = PointLight(finalStarRend.getWorldPosition(), Vector3f(1f))
         finalStarLight.parent = finalStarRend
-        //finalStarLight.translateLocal(Vector3f(1.0f, -1.0f, 1.0f))
         finalStar = Star(finalStarLight, finalStarRend, starMaterial)
         finalStar.setPosition(
             planet.getWorldPosition().x + 5.4f,
             planet.getWorldPosition().y,
             planet.getWorldPosition().z
         )
-
 
 
         //-----------------------Obstacle Objects---------------------------------------------------
@@ -507,9 +494,6 @@ class Scene(private val window: GameWindow) {
     fun lengthdir_x(length: Float, dir: Float): Float =
         (length * (Math.cos(dir.toDouble()))).toFloat() // Calculates point based on Direction and length - X
 
-    fun lengthdir_y(length: Float, dir: Float): Float =
-        (length * (Math.sin(dir.toDouble()))).toFloat() // Calculates point based on Direction and length - X
-
     fun lengthdir_z(length: Float, dir: Float): Float =
         (length * (-Math.sin(dir.toDouble()))).toFloat() // Calculates point based on Direction and length - Y
 
@@ -519,7 +503,7 @@ class Scene(private val window: GameWindow) {
         character.update()
 
         // Character is not moving
-        if (!window.getKeyState(GLFW_KEY_S) && !window.getKeyState(GLFW_KEY_W) ) {
+        if (!window.getKeyState(GLFW_KEY_S) && !window.getKeyState(GLFW_KEY_W)) {
             character.movement = false
         }
 
@@ -538,7 +522,7 @@ class Scene(private val window: GameWindow) {
             }
         } else {
             if (jumpSpeed == 0f) {
-                if (checkCollisionWithObstacles()  ) {
+                if (checkCollisionWithObstacles()) {
                     //Disables movement
                 } else {
                     if (window.getKeyState(GLFW_KEY_W)) {
@@ -657,7 +641,7 @@ class Scene(private val window: GameWindow) {
 
             val oldCharacterPosition = player!!.getWorldPosition()
             val newCharacterPosition = oldCharacterPosition.add(jumpingVector)
-            player!!.setPosition(newCharacterPosition.x(), newCharacterPosition.y() , newCharacterPosition.z())
+            player!!.setPosition(newCharacterPosition.x(), newCharacterPosition.y(), newCharacterPosition.z())
 
             if (jumpSpeed > 0.015) {
                 jumpDirection = true
@@ -709,7 +693,6 @@ class Scene(private val window: GameWindow) {
                 tCamera.translateGlobal(Vector3f(difference.x() / 20, difference.y() / 20, difference.z() / 20))
                 turnedCamCounter++
             }
-
         }
 
 
@@ -763,7 +746,7 @@ class Scene(private val window: GameWindow) {
 
     fun checkCollisionWithObstacles(): Boolean {
         for (i in 0 until obstacleAmount) {
-            if(i % 2 == 0) {
+            if (i % 2 == 0) {
                 val currentDiff = pointDistance3d(
                     player!!.x(),
                     player!!.y(),
@@ -772,16 +755,11 @@ class Scene(private val window: GameWindow) {
                     obstacles[i].y(),
                     obstacles[i].z()
                 )
-
                 if (currentDiff <= 0.01) {
-                    touched = true
                     return true
                 }
-
             }
-
         }
-        touched = false
         return false
     }
 
@@ -793,8 +771,7 @@ class Scene(private val window: GameWindow) {
         if (turnedCamera || collectedAllStars) return
 
         //Bewegung in x Richtung durch Differenz zwischen alter und neuer Position
-        var deltaX: Double = xpos - oldMousePosX
-        var deltaY: Double = ypos - oldMousePosY
+        val deltaX: Double = xpos - oldMousePosX
         oldMousePosX = xpos
         oldMousePosY = ypos
 
