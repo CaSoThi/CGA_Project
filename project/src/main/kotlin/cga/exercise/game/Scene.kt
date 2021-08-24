@@ -16,6 +16,8 @@ import org.joml.*
 import org.lwjgl.opengl.GL11
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.GL30.*
+import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.math.PI
 import kotlin.math.pow
 import kotlin.random.Random
@@ -57,6 +59,8 @@ class Scene(private val window: GameWindow) {
     private var tCamera = TronCamera()
 
     private var turnedCamera = false
+
+    private var turnedCamCounter = 0
 
     // Define lights
     private var light = PointLight(Vector3f(), Vector3f())
@@ -115,14 +119,14 @@ class Scene(private val window: GameWindow) {
 
     // Collectable list
     private var collectables: MutableList<Star>
-    private val collectableAmount: Int = 2
+    private val collectableAmount: Int = 20
     private var score: Int = 0
 
     private var finalStar: Star
 
     //Obstacles
     private var obstacles: MutableList<Renderable>
-    private var obstacleAmount = 2
+    private var obstacleAmount = 20
     private var touchedObstacles = 0
 
 
@@ -150,6 +154,7 @@ class Scene(private val window: GameWindow) {
         println("----------------------------How to play----------------------------\n")
         println("Try to get all the stars and finish by collecting the big star!")
         println("Have fun!")
+        println("--------------------------------Start------------------------------\n")
 
 
 
@@ -255,7 +260,6 @@ class Scene(private val window: GameWindow) {
         tCamera.rotateLocal(Math.toRadians(90.0f), Math.toRadians(50.0f), Math.toRadians(-90.0f))
         tCamera.translateLocal(Vector3f(0.0f, 0.5f, 15.0f))
 
-
         //----------------------------------------Light------------------------------------------------
         light = PointLight(tCamera.getWorldPosition(), Vector3f(1.0f))
         light.translateLocal(Vector3f(1.0f, -5.0f, 0.0f))
@@ -325,20 +329,12 @@ class Scene(private val window: GameWindow) {
         finalStarRend.meshList.add(finalStarMesh)
         val finalStarLight = PointLight(finalStarRend.getWorldPosition(), Vector3f(1f))
         finalStarLight.parent = finalStarRend
-        finalStarLight.translateLocal(Vector3f(1.0f, -1.0f, 1.0f))
+        //finalStarLight.translateLocal(Vector3f(1.0f, -1.0f, 1.0f))
         finalStar = Star(finalStarLight, finalStarRend, starMaterial)
         finalStar.setPosition(
             planet.getWorldPosition().x + 5.4f,
             planet.getWorldPosition().y,
             planet.getWorldPosition().z
-        )
-        //val randomX = Random.nextFloat() * 360f
-        //val randomY = Random.nextFloat() * 360f
-        finalStar.rotateAroundPoint(
-            0.0f,
-            (collectableAmount + 2) * PI.toFloat(),
-            (collectableAmount + 2).toFloat(),
-            planet.getWorldPosition()
         )
 
 
@@ -560,7 +556,6 @@ class Scene(private val window: GameWindow) {
         for (i in 0 until collectableAmount) {
             collectables[i].render(shaderInUse, "Point")
         }
-
         if (score >= collectableAmount) {
             finalStar.render(shaderInUse, "Point")
         }
@@ -587,9 +582,17 @@ class Scene(private val window: GameWindow) {
 
         if (collectedAllStars) {
             if (window.getKeyState(GLFW_KEY_ENTER)) {
-                tCamera.setPosition(player!!.x(), player!!.y(), player!!.z())
-                collectedAllStars = false
                 pressedEnter = true
+                tCamera.translateGlobal(
+                    Vector3f(
+                        difference.x() / 20 *turnedCamCounter,
+                        difference.y() / 20*turnedCamCounter,
+                        difference.z() / 20*turnedCamCounter
+                    ).negate()
+                )
+                collectedAllStars = false
+
+
             }
         } else {
             if (jumpSpeed == 0f) {
@@ -733,34 +736,20 @@ class Scene(private val window: GameWindow) {
 
 
         if (score >= collectableAmount && !pressedEnter && !collectedAllStars) {
+            println("You got all stars! Now catch the big one!")
             collectedAllStars = true
-
         }
 
+
         if (collectedAllStars) {
+            if (difference.x == 0.0f && difference.y == 0.0f && difference.z == 0.0f) {
 
-            tCamera.setPosition(
-                planet.getWorldPosition().x + 5.4f,
-                planet.getWorldPosition().y + 2,
-                planet.getWorldPosition().z +2
-            )
-            tCamera.rotateAroundPoint(
-                0.0f,
-                (collectableAmount + 2) * PI.toFloat(),
-                (collectableAmount + 2).toFloat(),
-                planet.getWorldPosition()
-            )
-           // tCamera.rotateLocal(Math.toRadians(90f), Math.toRadians(90f), Math.toRadians(90f))
-            collectedAllStars = false
-            pressedEnter = true
+                difference = Vector3f(
+                    finalStar.x() - tCamera.getWorldPosition().x,
+                    finalStar.y() - tCamera.getWorldPosition().y,
+                    finalStar.z() - tCamera.getWorldPosition().z
+                )
 
-
-            /*if (difference.x == 0.0f && difference.y == 0.0f && difference.z == 0.0f) {
-difference = Vector3f(
-                finalStar.x() -tCamera.getWorldPosition().x,
-                finalStar.y() -tCamera.getWorldPosition().y ,
-                finalStar.z()-tCamera.getWorldPosition().z
-            )
             }
 
             var direction = Vector3f(
@@ -770,22 +759,20 @@ difference = Vector3f(
             )
 
 
-            //println(pointDistance3d(tCamera.getWorldPosition().x, tCamera.getWorldPosition().y, tCamera.getWorldPosition().z, finalStar.getPosition().x, finalStar.getPosition().y, finalStar.getPosition().z))
-            if (pointDistance3d(tCamera.getWorldPosition().x, tCamera.getWorldPosition().y, tCamera.getWorldPosition().z, finalStar.getPosition().x, finalStar.getPosition().y, finalStar.getPosition().z) > 0.5) {
 
-                //tCamera.getWorldPosition().x += difference.x / 20;
-                //tCamera.getWorldPosition().y += difference.y /20
-               // tCamera.getWorldPosition().z += difference.z /20
-               // tCamera.rotateAroundPoint(0.0f, 0.2f, 0.0f, planet.getWorldPosition())
-                tCamera.translateLocal(Vector3f(difference.x() /20f, difference.y()/20f, difference.z()/20f))
+            if (pointDistance3d(
+                    tCamera.getWorldPosition().x,
+                    tCamera.getWorldPosition().y,
+                    tCamera.getWorldPosition().z,
+                    finalStar.x(),
+                    finalStar.y(),
+                    finalStar.z()
+                ) > 1.06
+            ) {
 
-
-
-            } else {
-                println("SIND DA")
-                collectedAllStars = false
-                pressedEnter = true
-            }*/
+                tCamera.translateGlobal(Vector3f(difference.x() / 20, difference.y() / 20, difference.z() / 20))
+                turnedCamCounter++
+            }
 
         }
 
@@ -862,7 +849,7 @@ difference = Vector3f(
     fun onMouseMove(xpos: Double, ypos: Double) {
 
         // If camera is set to orthographical camera, the player should not be able to look around
-        if (turnedCamera) return
+        if (turnedCamera || collectedAllStars) return
 
         //Bewegung in x Richtung durch Differenz zwischen alter und neuer Position
         var deltaX: Double = xpos - oldMousePosX
