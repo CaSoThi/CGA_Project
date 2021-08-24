@@ -140,6 +140,7 @@ class Scene(private val window: GameWindow) {
         println("-----------------------------Controls-----------------------------")
         println("Press 'S' oder 'W' to move upwards or downwards the planet.")
         println("Press 'SPACE' to jump.")
+        println("Press 'SPACE' and 'W' or 'S' to jump over an obstacle.")
         println("Press 'F1' or 'F2' to change the camera perspective.")
         println("Press '1', '2' or '3' to switch between shaders.\n")
         println("----------------------------How to play----------------------------\n")
