@@ -1,10 +1,5 @@
 # Video
-Erstellen Sie ein max. 3 Minuten langes Video, welches ihr laufendes Projekt vorstellt. 
-Erläutern Sie dabei, welche Features Sie implementiert haben und zeigen Sie diese.
-Das Video darf nur Ihre Anwendung zeigen, sowie Ihre Stimmen beinhalten.
+Da unsere Videodatei bei egal welcher Einstellung zu groß wurde (Github erlaubt lediglich 25MB), haben wir das Video nun bei Sciebo unter folgendem Link hochgeladen:
 
-Zur Erstellung können Sie ein beliebiges Programm verwenden, wir können folgende empfehlen:
-- https://obsproject.com/
-- https://www.techsmith.de/camtasia.html
+https://th-koeln.sciebo.de/s/tOpBbqmn990gCMg
 
-Bitte speichern Sie das Video als MP4 (H.264).
