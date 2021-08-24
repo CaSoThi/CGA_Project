@@ -18,3 +18,6 @@ Bei starker Ungleicheit der Features behalten wir uns eine individuelle Notenver
 - Verschiedene sich bewegende Hintergundobjekte (Aileen)
 - sammelbare Collectables (Sterne) zum Gewinnen des Spiels (Aileen, Caterina)
 - Hindernisse & "Hauptplanet" (Caterina)
+
+## Quellen
+- Charactermodell aus: https://www.youtube.com/playlist?list=PLFt_AvWsXl0fEx02iXR8uhDsVGhmM9Pse
